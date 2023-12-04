@@ -12,6 +12,9 @@
     <PackageReference Include="Nlog" Version="5.2.7" />
     <PackageReference Include="Nlog.Web.AspNetCore" Version="5.3.5" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+    <None Include="NLog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

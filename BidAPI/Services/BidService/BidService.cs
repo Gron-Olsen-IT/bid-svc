@@ -15,11 +15,13 @@ public class BidService : IBidService
         _infraRepo = infraRepo;
     }
 
-    public Task<Bid> Post(BidDTO bidDTO)
+    public async Task<Bid> Post(BidDTO bidDTO)
     {
         try
         {
-            return _bidRepo.Post(new(bidDTO));
+            Bid returnBid = await _bidRepo.Post(new(bidDTO));
+            await UpdateMaxBid(bidDTO.AuctionId);
+            return returnBid;
         }
         catch (Exception e)
         {
@@ -47,6 +49,18 @@ public class BidService : IBidService
         }
         catch (Exception e)
         {
+            _logger.LogError(e.Message);
+            throw new Exception(e.Message);
+        }
+    }
+
+    public async Task<Bid> UpdateMaxBid(string auctionId){
+        try{
+            Bid maxBid = await _bidRepo.GetMaxBid(auctionId);
+            await _infraRepo.UpdateMaxBid(auctionId, maxBid.Offer);
+            return maxBid;
+        }
+        catch(Exception e){
             _logger.LogError(e.Message);
             throw new Exception(e.Message);
         }

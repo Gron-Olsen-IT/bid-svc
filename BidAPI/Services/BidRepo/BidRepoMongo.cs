@@ -32,15 +32,12 @@ public class BidRepoMongo : IBidRepo
     {
         try
         {
-            var filter = Builders<Bid>.Filter.Eq("Id", auctionId);
-            var sort = Builders<Bid>.Sort.Descending("offer");
-            var bid = await _collection.Find(filter).Sort(sort).FirstOrDefaultAsync();
+            var bid = await _collection.Find(bid => bid.AuctionId == auctionId).SortByDescending(bid => bid.Offer).FirstOrDefaultAsync();
             return bid;
         }
         catch (Exception e)
         {
             throw new Exception(e.Message);
-
         }
     }
 
@@ -48,9 +45,7 @@ public class BidRepoMongo : IBidRepo
     {
         try
         {
-            var filter = Builders<Bid>.Filter.Eq("Id", auctionId);
-            var bids = await _collection.Find(filter).ToListAsync();
-            return bids;
+            return await _collection.Find(bid => bid.AuctionId == auctionId).ToListAsync();
         }
         catch (Exception e)
         {
