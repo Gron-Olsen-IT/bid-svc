@@ -36,8 +36,11 @@ jobs:
 
       - name: Merge develop into main
         run: |
+
           git config --global user.name 'Boes24'
           git config --global user.email 'cboes2402@gmail.com'
+
+
           git fetch origin
           git merge --ff-only origin/develop
           git push origin main
