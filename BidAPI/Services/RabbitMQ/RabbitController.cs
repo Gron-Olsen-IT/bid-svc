@@ -8,10 +8,13 @@ namespace BidAPI.Services;
 public class RabbitController : IRabbitController
 {
 
-    private readonly string? _MQPath = Environment.GetEnvironmentVariable("RABBITMQ_HOSTNAME");
-    public RabbitController(string MQPath)
+    private readonly string? _MQPath;
+    private readonly ILogger<RabbitController> _logger;
+    public RabbitController(ILogger<RabbitController> logger, IConfiguration configuration)
     {
-        _MQPath = MQPath;
+        _logger = logger;
+        _MQPath = configuration["RABBITMQ_HOSTNAME"];
+        
     }
     public BidDTO SendBid(BidDTO bidDTO)
     {

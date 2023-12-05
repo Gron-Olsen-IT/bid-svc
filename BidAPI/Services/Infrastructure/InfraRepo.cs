@@ -27,7 +27,7 @@ public class InfraRepo : IInfraRepo
         }
         catch(Exception e)
         {
-            Console.WriteLine(e);
+            _logger.LogError(e.Message);
             throw new Exception(e.Message);
         }
 
@@ -41,7 +41,7 @@ public class InfraRepo : IInfraRepo
         }
         catch(Exception e)
         {
-            Console.WriteLine(e);
+            _logger.LogError(e.Message);
             throw new Exception(e.Message);
         }
 
