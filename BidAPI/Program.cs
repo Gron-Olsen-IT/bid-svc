@@ -14,7 +14,7 @@ try
 
     builder.Services.AddScoped<IBidService, BidService>();
     builder.Services.AddScoped<IBidRepo, BidRepoMongo>();
-    builder.Services.AddScoped<IInfraRepo, InfraRepoRender>();
+    builder.Services.AddScoped<IInfraRepo, InfraRepo>();
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();
 

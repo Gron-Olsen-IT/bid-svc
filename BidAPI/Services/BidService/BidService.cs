@@ -8,7 +8,7 @@ public class BidService : IBidService
     private readonly ILogger<BidService> _logger;
     private readonly IInfraRepo _infraRepo;
 
-    public BidService(IBidRepo bidRepo, ILogger<BidService> logger , IInfraRepo infraRepo)
+    public BidService(IBidRepo bidRepo, ILogger<BidService> logger, IInfraRepo infraRepo)
     {
         _bidRepo = bidRepo;
         _logger = logger;
@@ -19,9 +19,19 @@ public class BidService : IBidService
     {
         try
         {
-            Bid returnBid = await _bidRepo.Post(new(bidDTO));
-            await UpdateMaxBid(bidDTO.AuctionId);
-            return returnBid;
+            _infraRepo.Post(bidDTO);
+
+            for (int i = 0; i < 4; i++)
+            {
+                Task.Delay(250).Wait();
+                Bid refreshedMaxBid = await _bidRepo.GetMaxBid(bidDTO.AuctionId);
+                if (refreshedMaxBid.BuyerId == bidDTO.BuyerId && refreshedMaxBid.Offer == bidDTO.Offer)
+                {
+                    await _infraRepo.UpdateMaxBid(bidDTO.AuctionId, refreshedMaxBid.Offer);
+                    return refreshedMaxBid;
+                }
+            }
+                throw new Exception("Bid was not accepted");
         }
         catch (Exception e)
         {
@@ -49,18 +59,6 @@ public class BidService : IBidService
         }
         catch (Exception e)
         {
-            _logger.LogError(e.Message);
-            throw new Exception(e.Message);
-        }
-    }
-
-    public async Task<Bid> UpdateMaxBid(string auctionId){
-        try{
-            Bid maxBid = await _bidRepo.GetMaxBid(auctionId);
-            await _infraRepo.UpdateMaxBid(auctionId, maxBid.Offer);
-            return maxBid;
-        }
-        catch(Exception e){
             _logger.LogError(e.Message);
             throw new Exception(e.Message);
         }
