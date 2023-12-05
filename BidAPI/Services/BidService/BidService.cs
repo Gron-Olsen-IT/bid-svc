@@ -23,12 +23,14 @@ public class BidService : IBidService
 
             for (int i = 0; i < 4; i++)
             {
+                _logger.LogInformation("Bid was attempted " + i);
                 Task.Delay(250).Wait();
                 Bid refreshedMaxBid = await _bidRepo.GetMaxBid(bidDTO.AuctionId);
                 if (refreshedMaxBid.BuyerId == bidDTO.BuyerId && refreshedMaxBid.Offer == bidDTO.Offer)
                 {
                     await _infraRepo.UpdateMaxBid(bidDTO.AuctionId, refreshedMaxBid.Offer);
                     return refreshedMaxBid;
+                    
                 }
             }
                 throw new Exception("Bid was not accepted");
