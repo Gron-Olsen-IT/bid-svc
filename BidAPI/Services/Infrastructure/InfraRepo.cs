@@ -37,6 +37,7 @@ public class InfraRepo : IInfraRepo
     {
         try
         {
+            _logger.LogInformation("Calling _rabbitController.SendBid in InfraRepo.Post");
             return _rabbitController.SendBid(bidDTO);
         }
         catch(Exception e)
