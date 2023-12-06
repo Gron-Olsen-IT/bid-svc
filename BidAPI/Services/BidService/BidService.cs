@@ -19,6 +19,10 @@ public class BidService : IBidService
     {
         try
         {
+            if (bidDTO.Offer <= _bidRepo.GetMaxBid(bidDTO.AuctionId).Result.Offer)
+            {
+                throw new Exception("Bid is not greater than current max bid");
+            }
             _logger.LogInformation("Calling _infraRepo.Post in BidService.Post");
             _infraRepo.Post(bidDTO);
 
