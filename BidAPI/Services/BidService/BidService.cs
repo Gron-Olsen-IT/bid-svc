@@ -22,10 +22,12 @@ public class BidService : IBidService
             _logger.LogInformation("Calling _infraRepo.Post in BidService.Post");
             _infraRepo.Post(bidDTO);
 
+
+            //Checking 4 times f the bid was accepted, 500ms between each attempt
             for (int i = 0; i < 4; i++)
             {
                 _logger.LogInformation("Bid was attempted " + i);
-                Task.Delay(250).Wait();
+                Task.Delay(500).Wait();
                 try
                 {
                     Bid refreshedMaxBid = await _bidRepo.GetMaxBid(bidDTO.AuctionId);
