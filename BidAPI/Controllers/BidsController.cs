@@ -67,6 +67,7 @@ public class BidsController : ControllerBase
     {
         try
         {
+            _logger.LogInformation($"Controller.Post - BidDTO: {bidDTO}");
             var bid = await _service.Post(bidDTO);
             return Ok(bid);
         }

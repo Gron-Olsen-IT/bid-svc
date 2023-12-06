@@ -19,6 +19,7 @@ public class BidService : IBidService
     {
         try
         {
+            _logger.LogInformation("Calling _infraRepo.Post in BidService.Post");
             _infraRepo.Post(bidDTO);
 
             for (int i = 0; i < 4; i++)
@@ -30,10 +31,9 @@ public class BidService : IBidService
                 {
                     await _infraRepo.UpdateMaxBid(bidDTO.AuctionId, refreshedMaxBid.Offer);
                     return refreshedMaxBid;
-                    
                 }
             }
-                throw new Exception("Bid was not accepted");
+            throw new Exception("Bid was not accepted");
         }
         catch (Exception e)
         {
@@ -65,6 +65,4 @@ public class BidService : IBidService
             throw new Exception(e.Message);
         }
     }
-
-
 }

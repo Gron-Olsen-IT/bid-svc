@@ -18,6 +18,7 @@ public class RabbitController : IRabbitController
     }
     public BidDTO SendBid(BidDTO bidDTO)
     {
+        _logger.LogInformation("Sending bid to RabbitMQ");
         var message = JsonSerializer.SerializeToUtf8Bytes(bidDTO);
 
         var factory = new ConnectionFactory { HostName = _MQPath };
