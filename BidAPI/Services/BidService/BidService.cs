@@ -23,26 +23,34 @@ public class BidService : IBidService
     {
         try
         {
-            int currentMaxBid = _bidRepo.GetMaxBid(bidDTO.AuctionId).Result.Offer;
-
-            if (currentMaxBid == null)
+            var MaxBid = _bidRepo.GetMaxBid(bidDTO.AuctionId);
+            _logger.LogInformation(MaxBid.Result.Offer.ToString());
+            if (MaxBid == null)
             {
                 int minPrice = _infraRepo.GetMinPrice(bidDTO.AuctionId).Result;
                 if (bidDTO.Offer < minPrice)
                 {
                     throw new ArgumentException("Bid is lower than min price");
                 }
+                else
+                {
+                    int currentMaxBid = MaxBid.Result.Offer;
+                    if (bidDTO.Offer <= currentMaxBid)
+                    {
+                        throw new ArgumentException("Bid is not greater than current max bid");
+                        
+                    }
+                    int minIncrement = CalculateMinIncrement(currentMaxBid);
+                    if (bidDTO.Offer - currentMaxBid < minIncrement)
+                    {
+                        throw new ArgumentException("Bid post increment is too small");
+                    }
+                
+                }
             }
             
-            if (bidDTO.Offer <= currentMaxBid)
-            {
-                throw new ArgumentException("Bid is not greater than current max bid");
-            }
-            int minIncrement = CalculateMinIncrement(currentMaxBid);
-            if (bidDTO.Offer - currentMaxBid < minIncrement)
-            {
-                throw new ArgumentException("Bid post increment is too small");
-            }
+            
+         
 
             _logger.LogInformation("Calling _infraRepo.Post in BidService.Post");
             _infraRepo.Post(bidDTO);

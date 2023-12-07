@@ -78,9 +78,9 @@ public class BidServicePost
     
     // Setting up the mock behavior for the repository's GetMaxBid method
     // Using SetupSequence to return different values on consecutive calls
-    _mockmongoRepo.Setup(x => x.GetMaxBid("100"))
+    _mockmongoRepo.SetupSequence(x => x.GetMaxBid("100"))
+        .ReturnsAsync((Bid)null)
         .ReturnsAsync(currentMaxBid);   // First call returns the current max bid
-
 
     var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost));
     Assert.AreEqual("Bid post increment is too small", ex.Message);
@@ -126,8 +126,7 @@ public class BidServicePost
         Bid bidToPost = new Bid(bidDtoPost);
         bidToPost.Id = "1";
     
-       
-    
+        
         // Setting up the mock behavior for the repository's GetMaxBid method
         // Using SetupSequence to return different values on consecutive calls
         _mockmongoRepo.Setup(x => x.GetMaxBid("100"))
