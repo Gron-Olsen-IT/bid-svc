@@ -7,22 +7,43 @@ public class BidService : IBidService
     private readonly IBidRepo _bidRepo;
     private readonly ILogger<BidService> _logger;
     private readonly IInfraRepo _infraRepo;
+    private readonly IRabbitController _rabbitController;
 
-    public BidService(IBidRepo bidRepo, ILogger<BidService> logger, IInfraRepo infraRepo)
+    public BidService(IBidRepo bidRepo, ILogger<BidService> logger, IInfraRepo infraRepo,
+        IRabbitController rabbitController)
     {
         _bidRepo = bidRepo;
         _logger = logger;
         _infraRepo = infraRepo;
+        _rabbitController = rabbitController;
+
     }
 
     public async Task<Bid> Post(BidDTO bidDTO)
     {
         try
         {
-            if (bidDTO.Offer <= _bidRepo.GetMaxBid(bidDTO.AuctionId).Result.Offer)
+            int currentMaxBid = _bidRepo.GetMaxBid(bidDTO.AuctionId).Result.Offer;
+
+            if (currentMaxBid == null)
             {
-                throw new Exception("Bid is not greater than current max bid");
+                int minPrice = _infraRepo.GetMinPrice(bidDTO.AuctionId).Result;
+                if (bidDTO.Offer < minPrice)
+                {
+                    throw new ArgumentException("Bid is lower than min price");
+                }
             }
+            
+            if (bidDTO.Offer <= currentMaxBid)
+            {
+                throw new ArgumentException("Bid is not greater than current max bid");
+            }
+            int minIncrement = CalculateMinIncrement(currentMaxBid);
+            if (bidDTO.Offer - currentMaxBid < minIncrement)
+            {
+                throw new ArgumentException("Bid post increment is too small");
+            }
+
             _logger.LogInformation("Calling _infraRepo.Post in BidService.Post");
             _infraRepo.Post(bidDTO);
 
@@ -41,7 +62,7 @@ public class BidService : IBidService
                         return refreshedMaxBid;
                     }
                 }
-                catch (Exception e)
+                catch (ArgumentException e)
                 {
                     _logger.LogError(e.Message);
                     continue;
@@ -49,14 +70,16 @@ public class BidService : IBidService
 
 
             }
+
             throw new Exception("Bid was not accepted");
         }
         catch (Exception e)
         {
             _logger.LogError(e.Message);
-            throw new Exception(e.Message);
+            throw new ArgumentException(e.Message);
         }
     }
+
     public Task<Bid> GetMaxBid(string auctionId)
     {
         try
@@ -69,6 +92,7 @@ public class BidService : IBidService
             throw new Exception(e.Message);
         }
     }
+
     public Task<List<Bid>> Get(string auctionId)
     {
         try
@@ -81,4 +105,24 @@ public class BidService : IBidService
             throw new Exception(e.Message);
         }
     }
+
+    public int CalculateMinIncrement(int currentMaxBid)
+    {
+        if (currentMaxBid <= 100)
+        {
+            return 10;
+        }
+        else if (currentMaxBid <= 1000)
+        {
+            return 50;
+        }
+
+        else if (currentMaxBid <= 10000)
+        {
+            return 250;
+        }
+        else return 1000;
+    
+    }
+
 }

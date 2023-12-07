@@ -33,6 +33,25 @@ public class InfraRepo : IInfraRepo
 
     }
 
+    public async Task<int> GetMinPrice(string auctionId)
+    {
+        try
+        {
+            HttpClient httpClient = new HttpClient();
+            var response = await httpClient.GetAsync($"{INFRA_CONN}/auctions/minprice/{auctionId}");
+            return int.Parse(await response.Content.ReadAsStringAsync());
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e.Message);
+            throw new Exception(e.Message);
+        }
+
+    }
+    
+
+
+
     public BidDTO Post(BidDTO bidDTO)
     {
         try
@@ -45,6 +64,8 @@ public class InfraRepo : IInfraRepo
             _logger.LogError(e.Message);
             throw new Exception(e.Message);
         }
-
+        
     }
+    
+    
 }
