@@ -38,8 +38,12 @@ public class BidService : IBidService
             {
                 throw new ArgumentException("Bid is lower than min price");
             }
+            _logger.LogInformation("Calling _infraRepo.Post in BidService.Post1");
+            _infraRepo.Post(bidDTO);
+            
+            
         }
-        else
+        else 
         {
             // Finder det aktuelle maksimumsbud
             int currentMaxBid = MaxBid.Offer;
@@ -58,11 +62,11 @@ public class BidService : IBidService
             {
                 throw new ArgumentException("Bid post increment is too small");
             }
+            _logger.LogInformation("Calling _infraRepo.Post in BidService.Post2");
+            _infraRepo.Post(bidDTO);
         }
 
-        // Poster det nye bud i infrastrukturen
-        _logger.LogInformation("Calling _infraRepo.Post in BidService.Post");
-        _infraRepo.Post(bidDTO);
+      
 
         // Tjekker 20 gange om det nye bud blev accepteret, med 250 ms ventetid mellem hvert forsøg
         for (int i = 0; i < 20; i++)
@@ -72,6 +76,7 @@ public class BidService : IBidService
 
             try
             {
+                _logger.LogInformation("Kommer ned i try i BidService.Post");
                 // Opdaterer det aktuelle maksimumsbud og tjekker om det nye bud blev accepteret
                 Bid refreshedMaxBid = await _bidRepo.GetMaxBid(bidDTO.AuctionId);
                 if (refreshedMaxBid != null && refreshedMaxBid.BuyerId == bidDTO.BuyerId && refreshedMaxBid.Offer == bidDTO.Offer)
