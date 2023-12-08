@@ -39,6 +39,7 @@ public class InfraRepo : IInfraRepo
         {
             HttpClient httpClient = new HttpClient();
             var response = await httpClient.GetAsync($"{INFRA_CONN}/auctions/minprice/{auctionId}");
+            Console.WriteLine($"Response!!: {response}");
             return int.Parse(await response.Content.ReadAsStringAsync());
         }
         catch (Exception e)
