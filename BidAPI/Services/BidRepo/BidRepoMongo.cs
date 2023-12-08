@@ -28,11 +28,12 @@ public class BidRepoMongo : IBidRepo
             throw new Exception(e.Message);
         }
     }
-    public async Task<Bid> GetMaxBid(string auctionId)
+    public async Task<Bid?> GetMaxBid(string auctionId)
     {
         try
         {
             var bid = await _collection.Find(bid => bid.AuctionId == auctionId).SortByDescending(bid => bid.Offer).FirstOrDefaultAsync();
+            Console.WriteLine($"LÆS EFTER DET HER"+bid);
             return bid;
         }
         catch (Exception e)

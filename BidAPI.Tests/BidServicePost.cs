@@ -118,33 +118,29 @@ public class BidServicePost
     [Test]
     public async Task BidPostFirstOfferAccepted()
     {
-    
-        // Creating a BidDTO to simulate the data sent for posting a bid
+        // Opretter en BidDTO for at simulere data sendt til oprettelse af et bud
         BidDTO bidDtoPost = new BidDTO("1", "100", 45, DateTime.Now);
-    
-        // Creating a Bid object that represents the expected posted bid
+
+        // Opretter et Bid-objekt, der repræsenterer det forventede oprettede bud
         Bid bidToPost = new Bid(bidDtoPost);
         bidToPost.Id = "1";
-    
-        
-        // Setting up the mock behavior for the repository's GetMaxBid method
-        // Using SetupSequence to return different values on consecutive calls
-        _mockmongoRepo.Setup(x => x.GetMaxBid("100"))
-            .ReturnsAsync((Bid)null);   // First call returns the current max bid
-        
-        _mockinfraRepo.Setup(x => x.GetMinPrice("100"))
-            .ReturnsAsync(50);   // First call returns the current max bid
 
-        
+        // Opsætter en sekvens for at returnere forskellige værdier ved på hinanden følgende kald
+        _mockmongoRepo.Setup(x => x.GetMaxBid("100"))
+            .ReturnsAsync((Bid)null);   // Første kald returnerer det aktuelle maksimumsbud
+
+        _mockinfraRepo.Setup(x => x.GetMinPrice("100"))
+            .ReturnsAsync(50);   // Første kald returnerer den aktuelle mindstepris
+
         _mockinfraRepo.Setup(x => x.Post(bidDtoPost)).Returns(bidDtoPost);
 
-    //act 
-         var postedBid = await _service.Post(bidDtoPost);
-         
-    
-         Assert.AreEqual(bidToPost, postedBid);
+        // Handling
+        var postedBid = await _service.Post(bidDtoPost); // Udfører handlingen ved at forsøge at oprette budet
+
+        // Assertion
+        
+        Assert.AreEqual(bidToPost, postedBid); // Asserting that the postedBid matches the expected bid to be posted
     }
-    
     
     
     
