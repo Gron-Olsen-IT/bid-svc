@@ -38,8 +38,9 @@ public class BidService : IBidService
             {
                 throw new ArgumentException("Bid is lower than min price");
             }
+            
         }
-        else
+        else 
         {
             // Finder det aktuelle maksimumsbud
             int currentMaxBid = MaxBid.Offer;
@@ -72,6 +73,7 @@ public class BidService : IBidService
 
             try
             {
+                _logger.LogInformation("Kommer ned i try i BidService.Post");
                 // Opdaterer det aktuelle maksimumsbud og tjekker om det nye bud blev accepteret
                 Bid refreshedMaxBid = await _bidRepo.GetMaxBid(bidDTO.AuctionId);
                 if (refreshedMaxBid != null && refreshedMaxBid.BuyerId == bidDTO.BuyerId && refreshedMaxBid.Offer == bidDTO.Offer)
