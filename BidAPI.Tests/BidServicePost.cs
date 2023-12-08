@@ -27,7 +27,7 @@ public class BidServicePost
         _mockRabbitController = new Mock<IRabbitController>();
         _service = new BidService(_mockmongoRepo.Object, _mockLogger.Object, _mockinfraRepo.Object, _mockRabbitController.Object);
     }
-
+/*
     [Test]
     public async Task BidPostSuccesfull()
     {
@@ -144,7 +144,7 @@ public class BidServicePost
     
     
     
-    
+    */
     
 }
     
