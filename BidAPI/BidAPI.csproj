@@ -7,15 +7,23 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.13" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.7" />
     <PackageReference Include="MongoDB.Driver" Version="2.22.0" />
     <PackageReference Include="Nlog" Version="5.2.7" />
+    <PackageReference Include="NLog.Targets.Loki" Version="2.1.1" />
     <PackageReference Include="Nlog.Web.AspNetCore" Version="5.3.5" />
     <PackageReference Include="RabbitMQ.Client" Version="6.7.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <None Include="NLog.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <PackageReference Include="VaultSharp" Version="1.13.0.1" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../sidecar/sidecar-lib/sidecar-lib.csproj" />
+  </ItemGroup>
+
 
 </Project>
