@@ -50,6 +50,22 @@ public class InfraRepo : IInfraRepo
 
     }
     
+    public async Task<bool> Get(string auctionId)
+    {
+        try
+        {
+            HttpClient httpClient = new HttpClient();
+            var response = await httpClient.GetAsync($"{INFRA_CONN}/auctions/{auctionId}");
+            Console.WriteLine($"Response!!: {response}");
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e.Message);
+            throw new Exception(e.Message);
+        }
+
+    }
 
 
 
@@ -68,5 +84,22 @@ public class InfraRepo : IInfraRepo
         
     }
     
+    public async Task<bool> GetUserId(string userId)
+    {
+        try
+        {
+            _logger.LogInformation("attempting to get user");
+            HttpClient httpClient = new HttpClient();
+            var response = await httpClient.GetAsync($"{INFRA_CONN}/users/{userId}");
+            _logger.LogInformation($"get response" + response); 
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e.Message);
+            throw new Exception(e.Message);
+        }
+
+    }
     
 }
