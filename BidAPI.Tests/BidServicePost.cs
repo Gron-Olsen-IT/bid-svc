@@ -57,7 +57,7 @@ public class BidServicePost
 
 
         // Asserting that the postedBid matches the expected bid to be posted
-        Assert.AreEqual(bidToPost, postedBid);
+        Assert.That(postedBid, Is.EqualTo(bidToPost));
     }
 
 
@@ -104,7 +104,7 @@ public class BidServicePost
 
 
         var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost));
-        Assert.AreEqual("Bid is not greater than current max bid", ex.Message);
+        Assert.That(ex.Message, Is.EqualTo("Bid is not greater than current max bid"));
     }
 
 
@@ -128,8 +128,8 @@ public class BidServicePost
 
         var postedBid = await _service.Post(bidDTO);
 
-        Assert.AreEqual(bidDTO.BuyerId, postedBid.BuyerId);
-        Assert.AreEqual(bidDTO.Offer, postedBid.Offer);
+        Assert.That(postedBid.BuyerId, Is.EqualTo(bidDTO.BuyerId));
+        Assert.That(postedBid.Offer, Is.EqualTo(bidDTO.Offer));
     }
 
 
