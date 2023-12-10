@@ -50,7 +50,7 @@ public class InfraRepo : IInfraRepo
 
     }
     
-    public async Task<bool> Get(string auctionId)
+    public async Task<bool> AuctionIdExists(string auctionId)
     {
         try
         {
@@ -84,7 +84,7 @@ public class InfraRepo : IInfraRepo
         
     }
     
-    public async Task<bool> GetUserId(string userId)
+    public async Task<bool> UserIdExists(string userId)
     {
         try
         {

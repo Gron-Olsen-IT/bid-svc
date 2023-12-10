@@ -9,12 +9,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9d875751-86af-438a-84cc-5b3bb6850ade" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.BidAPI.dir/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.BidAPI/.idea/indexLayout.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.BidAPI/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BidAPI.Tests/.idea/.idea.BidAPI.Tests.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../BidAPI.Tests/.idea/.idea.BidAPI.Tests.dir/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../BidAPI.Tests/BidServicePost.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BidAPI.Tests/BidServicePost.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.BidAPI.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.BidAPI.dir/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.BidAPI/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.BidAPI/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Services/BidService/BidService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Services/BidService/BidService.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,7 +23,7 @@
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/Program.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Services/BidRepo/BidRepoMongo.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Services/BidRepo/BidRepoMongo.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Services/BidService/BidService.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Services/Infrastructure/IInfraRepo.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Services/Infrastructure/InfraRepo.cs" root0="FORCE_HIGHLIGHTING" />
@@ -109,6 +106,7 @@
       <workItem from="1701954330016" duration="12028000" />
       <workItem from="1702037638625" duration="248000" />
       <workItem from="1702125999627" duration="165000" />
+      <workItem from="1702126182511" duration="8207000" />
     </task>
     <servers />
   </component>

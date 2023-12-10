@@ -29,7 +29,7 @@ public class BidService : IBidService
                 throw new ArgumentException("AuctionId is empty or is null");
             }
             
-            bool auctionExistsInDB = await _infraRepo.Get(bidDTO.AuctionId);
+            bool auctionExistsInDB = await _infraRepo.AuctionIdExists(bidDTO.AuctionId);
 
             if (!auctionExistsInDB)
             {
@@ -38,10 +38,10 @@ public class BidService : IBidService
                 
             }
 
-            bool userIdExistsInDB = await _infraRepo.GetUserId(bidDTO.BuyerId);
+            bool userIdExistsInDB = await _infraRepo.UserIdExists(bidDTO.BuyerId);
             if (!userIdExistsInDB)
             {
-                throw new ArgumentException("The buyerId does not match the active use");
+                throw new ArgumentException("The buyerId does not match a user in db");
             }
             
                 
