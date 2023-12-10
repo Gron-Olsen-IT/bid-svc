@@ -107,7 +107,7 @@ public class BidServicePost
         Assert.That(ex.Message, Is.EqualTo("Bid is not greater than current max bid"));
     }
 
-
+//test
     [Test]
     public async Task BidPostFirstOfferAccepted()
     {
