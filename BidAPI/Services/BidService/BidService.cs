@@ -78,7 +78,7 @@ public class BidService : IBidService
             {
                 _logger.LogInformation("Kommer ned i try i BidService.Post");
                 // Opdaterer det aktuelle maksimumsbud og tjekker om det nye bud blev accepteret
-                Bid refreshedMaxBid = await _bidRepo.GetMaxBid(bidDTO.AuctionId);
+                Bid? refreshedMaxBid = await _bidRepo.GetMaxBid(bidDTO.AuctionId);
                 if (refreshedMaxBid != null && refreshedMaxBid.BuyerId == bidDTO.BuyerId && refreshedMaxBid.Offer == bidDTO.Offer)
                 {
                     // Opdaterer det maksimale bud i infrastrukturen og returnerer det accepterede bud
@@ -104,11 +104,11 @@ public class BidService : IBidService
     }
 }
 
-    public Task<Bid> GetMaxBid(string auctionId)
+    public async Task<Bid?> GetMaxBid(string auctionId)
     {
         try
         {
-            return _bidRepo.GetMaxBid(auctionId);
+            return await _bidRepo.GetMaxBid(auctionId);
         }
         catch (Exception e)
         {
@@ -117,11 +117,23 @@ public class BidService : IBidService
         }
     }
 
-    public Task<List<Bid>> Get(string auctionId)
+    public async Task<List<Bid>> Get(string auctionId)
     {
         try
         {
-            return _bidRepo.Get(auctionId);
+            return await _bidRepo.Get(auctionId);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e.Message);
+            throw new Exception(e.Message);
+        }
+    }
+
+    public async Task<Bid?> DoesBidExists(string bidId){
+        try
+        {
+            return await _bidRepo.DoesBidExists(bidId);
         }
         catch (Exception e)
         {

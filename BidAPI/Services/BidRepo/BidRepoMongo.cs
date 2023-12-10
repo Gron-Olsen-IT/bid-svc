@@ -15,11 +15,21 @@ public class BidRepoMongo : IBidRepo
         _collection = mongoDatabase.GetCollection<Bid>("bids");
     }
 
+    public async Task<Bid?> DoesBidExists(string bidId){
+        try
+        {
+            return await _collection.Find(bid => bid.Id == bidId).FirstAsync();
+        }
+        catch (Exception e)
+        {
+            throw new Exception(e.Message);
+        }
+    }
+
     public async Task<Bid> Post(Bid bid)
     {
         try
         {
-
             await _collection.InsertOneAsync(bid);
             return bid;
         }
@@ -32,7 +42,7 @@ public class BidRepoMongo : IBidRepo
     {
         try
         {
-            var bid = await _collection.Find(bid => bid.AuctionId == auctionId).SortByDescending(bid => bid.Offer).FirstOrDefaultAsync();
+            Bid? bid = await _collection.Find(bid => bid.AuctionId == auctionId).SortByDescending(bid => bid.Offer).FirstAsync();
             Console.WriteLine($"LÆS EFTER DET HER"+bid);
             return bid;
         }
