@@ -56,7 +56,7 @@ public class BidRepoMongo : IBidRepo
                                             .ReplaceRoot(bid => bid.HighestBid)
                                             .ToListAsync();
             if (aggregatedBids.Count == 0){
-                throw new Exception("No bids found");
+                return new List<Bid?>{null};
             }
             return aggregatedBids.Select(bid => (Bid?)bid).ToList();
         }
