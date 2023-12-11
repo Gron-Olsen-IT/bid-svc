@@ -17,11 +17,12 @@ public class InfraRepo : IInfraRepo
         _logger = logger;
         _rabbitController = rabbitController;
     }
-    public async Task<HttpStatusCode> UpdateMaxBid(string auctionId, int maxBid)
+    public async Task<HttpStatusCode> UpdateMaxBid(string auctionId, int maxBid, string token)
     {
         try
         {
             HttpClient httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Add("Authorization", token);
             var response = await httpClient.PatchAsync($"{INFRA_CONN}/auctions/{auctionId}/?maxBid={maxBid}", null);
             return response.StatusCode;
         }
@@ -33,11 +34,12 @@ public class InfraRepo : IInfraRepo
 
     }
 
-    public async Task<int> GetMinPrice(string auctionId)
+    public async Task<int> GetMinPrice(string auctionId, string token)
     {
         try
         {
             HttpClient httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Add("Authorization", token);
             var response = await httpClient.GetAsync($"{INFRA_CONN}/auctions/minprice/{auctionId}");
             Console.WriteLine($"Response!!: {response}");
             return int.Parse(await response.Content.ReadAsStringAsync());
@@ -50,11 +52,12 @@ public class InfraRepo : IInfraRepo
 
     }
     
-    public async Task<bool> AuctionIdExists(string auctionId)
+    public async Task<bool> AuctionIdExists(string auctionId, string token)
     {
         try
         {
             HttpClient httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Add("Authorization", token);
             var response = await httpClient.GetAsync($"{INFRA_CONN}/auctions/{auctionId}");
             Console.WriteLine($"Response!!: {response}");
             return response.IsSuccessStatusCode;
@@ -84,12 +87,13 @@ public class InfraRepo : IInfraRepo
         
     }
     
-    public async Task<bool> UserIdExists(string userId)
+    public async Task<bool> UserIdExists(string userId, string token)
     {
         try
         {
             _logger.LogInformation("attempting to get user");
             HttpClient httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Add("Authorization", token);
             var response = await httpClient.GetAsync($"{INFRA_CONN}/users/{userId}");
             _logger.LogInformation($"get response" + response); 
             return response.IsSuccessStatusCode;

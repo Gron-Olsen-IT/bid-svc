@@ -45,7 +45,7 @@ public class BidRepoMongo : IBidRepo
     {
         try
         {
-            var aggregatedBids = await _collection.Aggregate()
+            List<Bid> aggregatedBids = await _collection.Aggregate()
                                             .Match(bid => auctionIds.Contains(bid.AuctionId))
                                             .SortByDescending(bid => bid.Offer)
                                             .Group(bid => bid.AuctionId, bids => new

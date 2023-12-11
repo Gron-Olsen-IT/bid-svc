@@ -3,6 +3,7 @@ using BidAPI.Services;
 using BidAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Net;
+using System.Security.Principal;
 
 namespace BidAPI.Controllers;
 
@@ -70,10 +71,12 @@ public class BidsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Bid>> Post([FromBody] BidDTO bidDTO)
     {
+        string? token;
         try
         {
+            token = Request.Headers["Authorization"];
             _logger.LogInformation($"Controller.Post - BidDTO: {bidDTO}");
-            var bid = await _service.Post(bidDTO);
+            var bid = await _service.Post(bidDTO, token);
             return Ok(bid);
         }
         catch (Exception e)
