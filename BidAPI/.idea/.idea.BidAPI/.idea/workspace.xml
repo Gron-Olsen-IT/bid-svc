@@ -9,11 +9,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d7d4a50a-4dd5-4d69-9651-058690f8d2e0" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../BidAPI.Tests/BidAPI.Tests.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/../BidAPI.Tests/BidAPI.Tests.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../BidAPI.Tests/UnitTest1.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../BidAPI.Tests/BidServicePost.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Services/BidService/BidService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Services/BidService/BidService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Services/Infrastructure/IInfraRepo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Services/Infrastructure/IInfraRepo.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Services/Infrastructure/InfraRepo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Services/Infrastructure/InfraRepo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.BidAPI.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.BidAPI.dir/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.BidAPI/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.BidAPI/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -22,6 +19,9 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="SWEA" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 5
@@ -36,7 +36,7 @@
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;develop&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;featuretesting&quot;,
     &quot;last_opened_file_path&quot;: &quot;/Users/rasmusmeldgaardjensen/Desktop/4-Semester/Eksamensprojekt/bid-svc/BidAPI/BidAPI.sln&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
@@ -95,6 +95,8 @@
       <updated>1701941285880</updated>
       <workItem from="1701941287453" duration="3805000" />
       <workItem from="1701952661786" duration="1434000" />
+      <workItem from="1702037931603" duration="228000" />
+      <workItem from="1702038221180" duration="746000" />
     </task>
     <servers />
   </component>

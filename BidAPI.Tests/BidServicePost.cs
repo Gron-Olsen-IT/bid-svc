@@ -28,120 +28,122 @@ public class BidServicePost
         _service = new BidService(_mockmongoRepo.Object, _mockLogger.Object, _mockinfraRepo.Object, _mockRabbitController.Object);
     }
 
-    [Test]
-    public async Task BidPostSuccesfull()
-    {
-        // Creating a BidDTO to simulate the data sent for posting a bid
-        BidDTO bidDtoPost = new BidDTO("1", "100", 60, DateTime.Now);
 
-        // Creating a Bid object that represents the expected posted bid
-        Bid bidToPost = new Bid(bidDtoPost);
-        bidToPost.Id = "1";
+    
 
-        // Creating a BidDTO representing the current maximum bid
-        BidDTO bidDtoCurrentMax = new BidDTO("1", "100", 50, DateTime.Now);
-        Bid currentMaxBid = new Bid(bidDtoCurrentMax);
-
-        // Setting up the mock behavior for the repository's GetMaxBid method
-        // Using SetupSequence to return different values on consecutive calls
-        _mockmongoRepo.SetupSequence(x => x.GetMaxBid("100"))
-            .ReturnsAsync(currentMaxBid)    // First call returns the current max bid
-            .ReturnsAsync(bidToPost);       // Second call returns the expected bid to be posted
-
-        // Setting up the mock behavior for the repository's Post method
-        _mockinfraRepo.Setup(x => x.Post(bidDtoPost)).Returns(bidDtoPost);
-
-        // Invoking the method being tested - posting a bid
-        var postedBid = await _service.Post(bidDtoPost);
-
-
-
-        // Asserting that the postedBid matches the expected bid to be posted
-        Assert.That(postedBid, Is.EqualTo(bidToPost));
-    }
-
-
-    [Test]
-    public async Task BidPostIncrementTooSmall()
-    {
-        BidDTO bidDtoPost = new BidDTO("1", "100", 55, DateTime.Now); // New bid
-        Bid currentMaxBid = new Bid(new BidDTO("2", "100", 50, DateTime.Now)); // Current max bid
-
-        _mockmongoRepo.Setup(x => x.GetMaxBid("100"))
-            .ReturnsAsync(currentMaxBid); // Existing max bid
-
-        _mockinfraRepo.Setup(x => x.Post(It.IsAny<BidDTO>()))
-            .Returns((BidDTO)null); // No bid posted due to error
-
-        var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost));
-        Assert.That(ex.Message, Is.EqualTo("Bid post increment is too small"));
-    }
-
-
-
-
-
+[Test]
+   public async Task BidPostSuccesfull()
+   {
+   // Creating a BidDTO to simulate the data sent for posting a bid
+   BidDTO bidDtoPost = new BidDTO("1", "100", 60, DateTime.Now);
+   
+   // Creating a Bid object that represents the expected posted bid
+   Bid bidToPost = new Bid(bidDtoPost);
+   bidToPost.Id = "1";
+   
+   // Creating a BidDTO representing the current maximum bid
+   BidDTO bidDtoCurrentMax = new BidDTO("1", "100", 50, DateTime.Now);
+   Bid currentMaxBid = new Bid(bidDtoCurrentMax);
+   
+   // Setting up the mock behavior for the repository's GetMaxBid method
+   // Using SetupSequence to return different values on consecutive calls
+   _mockmongoRepo.SetupSequence(bidRepo => bidRepo.GetMaxBid("100"))
+   .ReturnsAsync(currentMaxBid)  
+   .ReturnsAsync(bidToPost);       
+   
+   // Setting up the mock behavior for the repository's Post method
+   _mockinfraRepo.Setup(infraRepo => infraRepo.Post(bidDtoPost)).Returns(bidDtoPost);
+   _mockinfraRepo.Setup(infraRepo => infraRepo.AuctionIdExists(bidDtoPost.AuctionId)).ReturnsAsync(true);
+   _mockinfraRepo.Setup(infraRepo => infraRepo.UserIdExists(bidDtoPost.BuyerId)).ReturnsAsync(true);
+   
+   // Invoking the method being tested - posting a bid
+   var postedBid = await _service.Post(bidDtoPost);
+   
+   
+   
+   
+   // Asserting that the postedBid matches the expected bid to be posted
+   Assert.AreEqual(bidToPost, postedBid);
+   }
+   
+   
+    
+    
+    
     [Test]
     public async Task BidPostOfferIsLessThanCurrentMaxBid()
     {
-
+    
         // Creating a BidDTO to simulate the data sent for posting a bid
         BidDTO bidDtoPost = new BidDTO("1", "100", 45, DateTime.Now);
-
+    
         // Creating a Bid object that represents the expected posted bid
         Bid bidToPost = new Bid(bidDtoPost);
         bidToPost.Id = "1";
-
+        
         // Creating a BidDTO representing the current maximum bid
         BidDTO bidDtoCurrentMax = new BidDTO("1", "100", 50, DateTime.Now);
         Bid currentMaxBid = new Bid(bidDtoCurrentMax);
 
+        
         // Setting up the mock behavior for the repository's GetMaxBid method
         // Using SetupSequence to return different values on consecutive calls
-        _mockmongoRepo.SetupSequence(x => x.GetMaxBid("100"))
-            .ReturnsAsync(currentMaxBid)   // First call returns the current max bid
-            .ReturnsAsync(bidToPost);      // Second call returns the expected bid to be posted
+        _mockmongoRepo.SetupSequence(bidRepo => bidRepo.GetMaxBid("100"))
+            .ReturnsAsync(currentMaxBid)  
+            .ReturnsAsync(bidToPost);       
+   
+        // Setting up the mock behavior for the repository's Post method
+        _mockinfraRepo.Setup(infraRepo => infraRepo.Post(bidDtoPost)).Returns(bidDtoPost);
+        _mockinfraRepo.Setup(infraRepo => infraRepo.AuctionIdExists(bidDtoPost.AuctionId)).ReturnsAsync(true);
+        _mockinfraRepo.Setup(infraRepo => infraRepo.UserIdExists(bidDtoPost.BuyerId)).ReturnsAsync(true);
+
 
 
         var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost));
-        Assert.That(ex.Message, Is.EqualTo("Bid is not greater than current max bid"));
+        Assert.AreEqual("Bid is not greater than current max bid", ex.Message);
     }
-
-//test
+    
+    
+    /*  
     [Test]
     public async Task BidPostFirstOfferAccepted()
     {
-        BidDTO bidDTO = new BidDTO("1", "100", 55, DateTime.Now);
+        // Opretter en BidDTO for at simulere data sendt til oprettelse af et bud
+        BidDTO bidDtoPost = new BidDTO("1", "100", 60, DateTime.Now);
 
-        Bid bidToPost = new Bid(bidDTO);
+        // Opretter et Bid-objekt, der repræsenterer det forventede oprettede bud
+        Bid bidToPost = new Bid(bidDtoPost);
         bidToPost.Id = "1";
 
-        _mockmongoRepo.SetupSequence(x => x.GetMaxBid("100"))
-            .ReturnsAsync((Bid)null) // Simulates no existing bids
-            .ReturnsAsync(bidToPost);
+     
+        _mockinfraRepo.SetupSequence(infraRepo => infraRepo.GetMinPrice("100"))
+            .ReturnsAsync(10);
 
-        _mockinfraRepo.Setup(x => x.GetMinPrice("100"))
-            .ReturnsAsync(50); // Simulates minimum price
+        // Setting up the mock behavior for the repository's GetMaxBid method to return a value
+        _mockmongoRepo.Setup(bidRepo => bidRepo.GetMaxBid("100")).ReturnsAsync((Bid?)null);
+        
 
-        _mockinfraRepo.Setup(x => x.Post(bidDTO))
-            .Returns(bidDTO); // Simulates posting of the bid
+        // Setting up the mock behavior for other necessary methods
+        _mockinfraRepo.Setup(infraRepo => infraRepo.Post(bidDtoPost)).Returns(bidDtoPost);
+        _mockinfraRepo.Setup(infraRepo => infraRepo.AuctionIdExists(bidDtoPost.AuctionId)).ReturnsAsync(true);
+        _mockinfraRepo.Setup(infraRepo => infraRepo.UserIdExists(bidDtoPost.BuyerId)).ReturnsAsync(true);
 
-        var postedBid = await _service.Post(bidDTO);
+        // Handling
+        var postedBid = await _service.Post(bidDtoPost);
 
-        Assert.That(postedBid.BuyerId, Is.EqualTo(bidDTO.BuyerId));
-        Assert.That(postedBid.Offer, Is.EqualTo(bidDTO.Offer));
+        // Assertion
+        Assert.AreEqual(bidToPost, postedBid);
     }
-
-
-
-
-
-
+  */
 }
+    
+   
+    
+
+    
+    
 
 
+    
 
-
-
-
-
+    

@@ -10,6 +10,9 @@ public interface IInfraRepo
     Task<HttpStatusCode> UpdateMaxBid(string auctionId, int maxBid);
     BidDTO Post(BidDTO bidDTO);
     Task<int> GetMinPrice(string auctionId);
+    Task<bool> AuctionIdExists(string auctionId);
+    
+    Task<bool> UserIdExists(string userId);
     
     
     

@@ -10,9 +10,9 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 0
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
   <component name="ProjectId" id="2ZCrvz4xvcFOM2asrYtcgdBOXKe" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -23,7 +23,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "develop",
+    "git-widget-placeholder": "featuretesting",
     "last_opened_file_path": "/Users/rasmusmeldgaardjensen/Desktop/4-Semester/Eksamensprojekt/bid-svc/BidAPI.Tests",
     "vue.rearranger.settings.migration": "true"
   },
@@ -44,6 +44,7 @@
       <option name="presentableId" value="Default" />
       <updated>1701937138242</updated>
       <workItem from="1701937142019" duration="178000" />
+      <workItem from="1702137572576" duration="32000" />
     </task>
     <servers />
   </component>
