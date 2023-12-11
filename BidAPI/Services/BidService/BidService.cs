@@ -54,7 +54,8 @@ public class BidService : IBidService
             // Henter det aktuelle maksimumsbud for auktionen
             Bid? MaxBid = await _bidRepo.GetMaxBid(bidDTO.AuctionId);
             
-
+            //test
+        
             // Håndterer scenarier, hvor der ikke er noget eksisterende bud
             if (MaxBid == null)
             {
