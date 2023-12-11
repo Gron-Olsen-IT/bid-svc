@@ -52,12 +52,12 @@ public class BidsController : ControllerBase
 
     [Authorize]
     [HttpPost("max")]
-    public async Task<ActionResult<Bid>> GetMaxBids(List<string> auctionIds)
+    public async Task<ActionResult<Bid>> GetMaxBids([FromBody]List<string> auctionIds)
     {
         try
         {
-            var bid = await _service.GetMaxBids(auctionIds);
-            return Ok(bid);
+            var bids = await _service.GetMaxBids(auctionIds);
+            return Ok(bids);
         }
         catch (Exception e)
         {
