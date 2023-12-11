@@ -34,7 +34,7 @@ namespace BidAPI.Models
         }
         public string BuyerId { get; init; }
         public string AuctionId { get; init; }
-        public int Offer { get; init; }
+        public int Offer { get; init; } 
         public DateTime CreatedAt { get; init; }
     }
 }

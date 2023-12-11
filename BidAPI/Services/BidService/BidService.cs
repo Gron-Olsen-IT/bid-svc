@@ -23,6 +23,10 @@ public class BidService : IBidService
     {
         try
         {
+            if(bidDTO.Offer == 0 )
+            {
+                throw new ArgumentException("Offer is 0");
+            }
 
             if (string.IsNullOrEmpty(bidDTO.AuctionId))
             {
@@ -43,13 +47,12 @@ public class BidService : IBidService
             {
                 throw new ArgumentException("The buyerId does not match a user in db");
             }
-            /*
+            
             //skal der flere valideringer på f.eks også yesterday?
-            if(bidDTO.CreatedAt < DateTime.Now) 
+            if(bidDTO.CreatedAt < DateTime.Now.AddMinutes(-5) || bidDTO.CreatedAt > DateTime.Now.AddMinutes(5)) 
             {
-                throw new ArgumentException("Bid is created in the future");
+                throw new ArgumentException("Bid was posted with a wrong timestamp (not within 5 minutes of current time)");
             }
-            */
             
             // Henter det aktuelle maksimumsbud for auktionen
             Bid? MaxBid = (await _bidRepo.GetMaxBids(new List<string> { bidDTO.AuctionId })).FirstOrDefault();
