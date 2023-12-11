@@ -55,7 +55,7 @@ public class BidService : IBidService
             }
             
             // Henter det aktuelle maksimumsbud for auktionen
-            Bid? MaxBid = await _bidRepo.GetMaxBid(bidDTO.AuctionId);
+            Bid? MaxBid = (await _bidRepo.GetMaxBids(new List<string> { bidDTO.AuctionId })).FirstOrDefault();
             
             //test
         
@@ -115,7 +115,7 @@ public class BidService : IBidService
             {
                 _logger.LogInformation("Kommer ned i try i BidService.Post");
                 // Opdaterer det aktuelle maksimumsbud og tjekker om det nye bud blev accepteret
-                Bid? refreshedMaxBid = await _bidRepo.GetMaxBid(bidDTO.AuctionId);
+                Bid? refreshedMaxBid = (await _bidRepo.GetMaxBids(new List<string> { bidDTO.AuctionId })).FirstOrDefault();
                 if (refreshedMaxBid != null && refreshedMaxBid.BuyerId == bidDTO.BuyerId && refreshedMaxBid.Offer == bidDTO.Offer)
                 {
                     // Opdaterer det maksimale bud i infrastrukturen og returnerer det accepterede bud
@@ -141,11 +141,11 @@ public class BidService : IBidService
         }
     }
 
-    public async Task<Bid?> GetMaxBid(string auctionId)
+    public async Task<List<Bid?>> GetMaxBids(List<string> auctionIds)
     {
         try
         {
-            return await _bidRepo.GetMaxBid(auctionId);
+            return await _bidRepo.GetMaxBids(auctionIds);
         }
         catch (Exception e)
         {

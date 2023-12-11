@@ -1,4 +1,6 @@
+using BidAPI.Controllers;
 using BidAPI.Models;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace BidAPI.Services;
@@ -15,7 +17,8 @@ public class BidRepoMongo : IBidRepo
         _collection = mongoDatabase.GetCollection<Bid>("bids");
     }
 
-    public async Task<Bid?> DoesBidExists(string bidId){
+    public async Task<Bid?> DoesBidExists(string bidId)
+    {
         try
         {
             return await _collection.Find(bid => bid.Id == bidId).FirstAsync();
@@ -38,13 +41,24 @@ public class BidRepoMongo : IBidRepo
             throw new Exception(e.Message);
         }
     }
-    public async Task<Bid?> GetMaxBid(string auctionId)
+    public async Task<List<Bid?>> GetMaxBids(List<string> auctionIds)
     {
         try
         {
-            Bid? bid = await _collection.Find(bid => bid.AuctionId == auctionId).SortByDescending(bid => bid.Offer).FirstAsync();
-            Console.WriteLine($"LÆS EFTER DET HER"+bid);
-            return bid;
+            var aggregatedBids = await _collection.Aggregate()
+                                            .Match(bid => auctionIds.Contains(bid.AuctionId))
+                                            .SortByDescending(bid => bid.Offer)
+                                            .Group(bid => bid.AuctionId, bids => new
+                                            {
+                                                AuctionId = bids.Key,
+                                                HighestBid = bids.First() 
+                                            })
+                                            .ReplaceRoot(bid => bid.HighestBid)
+                                            .ToListAsync();
+            if (aggregatedBids.Count == 0){
+                throw new Exception("No bids found");
+            }
+            return aggregatedBids.Select(bid => (Bid?)bid).ToList();
         }
         catch (Exception e)
         {
