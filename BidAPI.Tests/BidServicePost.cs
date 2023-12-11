@@ -103,8 +103,6 @@ public class BidServicePost
         Assert.AreEqual("Bid is not greater than current max bid", ex.Message);
     }
 
-
-    /*  
     [Test]
     public async Task BidPostFirstOfferAccepted()
     {
@@ -120,13 +118,18 @@ public class BidServicePost
             .ReturnsAsync(10);
 
         // Setting up the mock behavior for the repository's GetMaxBid method to return a value
-        _mockmongoRepo.Setup(bidRepo => bidRepo.GetMaxBid("100")).ReturnsAsync((Bid?)null);
+        
+        _mockmongoRepo.SetupSequence(bidRepo => bidRepo.GetMaxBid("100"))
+            .ReturnsAsync((Bid?)null)
+            .ReturnsAsync(bidToPost);
+
         
 
         // Setting up the mock behavior for other necessary methods
         _mockinfraRepo.Setup(infraRepo => infraRepo.Post(bidDtoPost)).Returns(bidDtoPost);
         _mockinfraRepo.Setup(infraRepo => infraRepo.AuctionIdExists(bidDtoPost.AuctionId)).ReturnsAsync(true);
         _mockinfraRepo.Setup(infraRepo => infraRepo.UserIdExists(bidDtoPost.BuyerId)).ReturnsAsync(true);
+        _mockinfraRepo.Setup(infraRepo => infraRepo.UpdateMaxBid(bidDtoPost.AuctionId, bidDtoPost.Offer)).ReturnsAsync(HttpStatusCode.OK);
 
         // Handling
         var postedBid = await _service.Post(bidDtoPost);
@@ -134,7 +137,92 @@ public class BidServicePost
         // Assertion
         Assert.AreEqual(bidToPost, postedBid);
     }
-  */
+
+    [Test]
+
+    public async Task BidPostUserDoesntExist()
+    {
+        BidDTO bidDtoPost = new BidDTO("1", "100", 60, DateTime.Now);
+        
+        // Opretter et Bid-objekt, der repræsenterer det forventede oprettede bud
+        Bid bidToPost = new Bid(bidDtoPost);
+        bidToPost.Id = "1";
+
+        _mockinfraRepo.Setup(infraRepo => infraRepo.AuctionIdExists(bidDtoPost.AuctionId)).ReturnsAsync(true);
+        _mockinfraRepo.Setup(infraRepo => infraRepo.UserIdExists(bidDtoPost.BuyerId)).ReturnsAsync(false);
+        
+        //act
+
+        //assert
+     
+        var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost));
+        Assert.AreEqual("The buyerId does not match a user in db", ex.Message);
+        
+    }
+    
+    
+    [Test]
+    public async Task BidPostAuctionDoesntExist()
+    {
+        BidDTO bidDtoPost = new BidDTO("1", "100", 60, DateTime.Now);
+        
+        // Opretter et Bid-objekt, der repræsenterer det forventede oprettede bud
+        Bid bidToPost = new Bid(bidDtoPost);
+        bidToPost.Id = "1";
+
+        _mockinfraRepo.Setup(infraRepo => infraRepo.AuctionIdExists(bidDtoPost.AuctionId)).ReturnsAsync(false);
+        
+        //act
+        
+        
+        var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost));
+        Assert.AreEqual("The auctionId does not match an existing auction", ex.Message);
+        
+        
+    }
+
+    [Test]
+    public async Task PostBidCreatedAtIsWrongTime()
+    {
+        BidDTO bidDtoPost = new BidDTO("1", "100", 60, DateTime.Now.AddMinutes(-10));
+        
+        // Opretter et Bid-objekt, der repræsenterer det forventede oprettede bud
+        Bid bidToPost = new Bid(bidDtoPost);
+        bidToPost.Id = "1";
+        
+        
+        _mockinfraRepo.Setup(infraRepo => infraRepo.AuctionIdExists(bidDtoPost.AuctionId)).ReturnsAsync(true);
+        _mockinfraRepo.Setup(infraRepo => infraRepo.UserIdExists(bidDtoPost.BuyerId)).ReturnsAsync(true);
+
+        
+        //act
+        var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost));
+        Assert.AreEqual("Bid was posted with a wrong timestamp (not within 5 minutes of current time)", ex.Message);
+
+        
+    }
+
+
+    [Test]
+    public async Task PostBidOfferIsMissingFromRequest()
+    {
+        BidDTO bidDtoPost = new BidDTO("1", "100", 0, DateTime.Now);
+
+        // Opretter et Bid-objekt, der repræsenterer det forventede oprettede bud
+        Bid bidToPost = new Bid(bidDtoPost);
+        bidToPost.Id = "1";
+        
+       
+
+        
+        var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost));
+        Assert.AreEqual("Offer is 0", ex.Message);
+        
+        
+        
+    }
+    
+  
 }
 
 
