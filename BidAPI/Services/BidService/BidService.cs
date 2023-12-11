@@ -19,7 +19,7 @@ public class BidService : IBidService
 
     }
 
-    public async Task<Bid> Post(BidDTO bidDTO)
+    public async Task<Bid> Post(BidDTO bidDTO, string token)
     {
         try
         {
@@ -33,7 +33,7 @@ public class BidService : IBidService
                 throw new ArgumentException("AuctionId is empty or is null");
             }
             
-            bool auctionExistsInDB = await _infraRepo.AuctionIdExists(bidDTO.AuctionId);
+            bool auctionExistsInDB = await _infraRepo.AuctionIdExists(bidDTO.AuctionId, token);
 
             if (!auctionExistsInDB)
             {
@@ -41,8 +41,8 @@ public class BidService : IBidService
                 throw new ArgumentException("The auctionId does not match an existing auction");
                 
             }
-            
-            bool userIdExistsInDB = await _infraRepo.UserIdExists(bidDTO.BuyerId);
+
+            bool userIdExistsInDB = await _infraRepo.UserIdExists(bidDTO.BuyerId, token);
             if (!userIdExistsInDB)
             {
                 throw new ArgumentException("The buyerId does not match a user in db");
@@ -64,7 +64,7 @@ public class BidService : IBidService
             {
                 Console.WriteLine("MaxBid er null");
                 // Henter den aktuelle mindstepris for auktionen
-                int minPrice = await _infraRepo.GetMinPrice(bidDTO.AuctionId);
+                int minPrice = await _infraRepo.GetMinPrice(bidDTO.AuctionId, token);
 
                 // Validerer, om det nye bud er lavere end mindsteprisen
                 if (bidDTO.Offer < minPrice)
@@ -101,10 +101,6 @@ public class BidService : IBidService
                 _infraRepo.Post(bidDTO);
             }
 
-
-
-
-
             // Tjekker 20 gange om det nye bud blev accepteret, med 250 ms ventetid mellem hvert forsøg
             for (int i = 0; i < 20; i++)
             {
@@ -119,7 +115,7 @@ public class BidService : IBidService
                 if (refreshedMaxBid != null && refreshedMaxBid.BuyerId == bidDTO.BuyerId && refreshedMaxBid.Offer == bidDTO.Offer)
                 {
                     // Opdaterer det maksimale bud i infrastrukturen og returnerer det accepterede bud
-                    await _infraRepo.UpdateMaxBid(bidDTO.AuctionId, refreshedMaxBid.Offer);
+                    await _infraRepo.UpdateMaxBid(bidDTO.AuctionId, refreshedMaxBid.Offer, token);
                     return refreshedMaxBid;
                 }
             }

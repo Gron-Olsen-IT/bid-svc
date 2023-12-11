@@ -16,6 +16,7 @@ public class BidServicePost
     private Mock<ILogger<BidService>> _mockLogger;
     private Mock<IRabbitController> _mockRabbitController;
     private BidService _service;
+    private string _token;
 
 
     [SetUp]
@@ -26,10 +27,8 @@ public class BidServicePost
         _mockLogger = new Mock<ILogger<BidService>>();
         _mockRabbitController = new Mock<IRabbitController>();
         _service = new BidService(_mockmongoRepo.Object, _mockLogger.Object, _mockinfraRepo.Object, _mockRabbitController.Object);
+        _token = "token";
     }
-
-
-
 
     [Test]
     public async Task BidPostSuccesfull()
@@ -53,11 +52,11 @@ public class BidServicePost
 
         // Setting up the mock behavior for the repository's Post method
         _mockinfraRepo.Setup(infraRepo => infraRepo.Post(bidDtoPost)).Returns(bidDtoPost);
-        _mockinfraRepo.Setup(infraRepo => infraRepo.AuctionIdExists(bidDtoPost.AuctionId)).ReturnsAsync(true);
-        _mockinfraRepo.Setup(infraRepo => infraRepo.UserIdExists(bidDtoPost.BuyerId)).ReturnsAsync(true);
+        _mockinfraRepo.Setup(infraRepo => infraRepo.AuctionIdExists(bidDtoPost.AuctionId, _token)).ReturnsAsync(true);
+        _mockinfraRepo.Setup(infraRepo => infraRepo.UserIdExists(bidDtoPost.BuyerId, _token)).ReturnsAsync(true);
 
         // Invoking the method being tested - posting a bid
-        var postedBid = await _service.Post(bidDtoPost);
+        var postedBid = await _service.Post(bidDtoPost, _token);
 
 
 
@@ -65,9 +64,6 @@ public class BidServicePost
         // Asserting that the postedBid matches the expected bid to be posted
         Assert.AreEqual(bidToPost, postedBid);
     }
-
-
-
 
 
     [Test]
@@ -94,12 +90,12 @@ public class BidServicePost
 
         // Setting up the mock behavior for the repository's Post method
         _mockinfraRepo.Setup(infraRepo => infraRepo.Post(bidDtoPost)).Returns(bidDtoPost);
-        _mockinfraRepo.Setup(infraRepo => infraRepo.AuctionIdExists(bidDtoPost.AuctionId)).ReturnsAsync(true);
-        _mockinfraRepo.Setup(infraRepo => infraRepo.UserIdExists(bidDtoPost.BuyerId)).ReturnsAsync(true);
+        _mockinfraRepo.Setup(infraRepo => infraRepo.AuctionIdExists(bidDtoPost.AuctionId, _token)).ReturnsAsync(true);
+        _mockinfraRepo.Setup(infraRepo => infraRepo.UserIdExists(bidDtoPost.BuyerId, _token)).ReturnsAsync(true);
 
 
 
-        var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost));
+        var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost, _token));
         Assert.AreEqual("Bid is not greater than current max bid", ex.Message);
     }
 
@@ -113,26 +109,26 @@ public class BidServicePost
         Bid bidToPost = new Bid(bidDtoPost);
         bidToPost.Id = "1";
 
-     
-        _mockinfraRepo.SetupSequence(infraRepo => infraRepo.GetMinPrice("100"))
+
+        _mockinfraRepo.SetupSequence(infraRepo => infraRepo.GetMinPrice("100", _token))
             .ReturnsAsync(10);
 
         // Setting up the mock behavior for the repository's GetMaxBid method to return a value
-        
-        _mockmongoRepo.SetupSequence(bidRepo => bidRepo.GetMaxBid("100"))
-            .ReturnsAsync((Bid?)null)
-            .ReturnsAsync(bidToPost);
 
-        
+        _mockmongoRepo.SetupSequence(bidRepo => bidRepo.GetMaxBids(new List<string> { "100" }))
+            .ReturnsAsync((List<Bid>?)null)
+            .ReturnsAsync(new List<Bid> { bidToPost });
+
+
 
         // Setting up the mock behavior for other necessary methods
         _mockinfraRepo.Setup(infraRepo => infraRepo.Post(bidDtoPost)).Returns(bidDtoPost);
-        _mockinfraRepo.Setup(infraRepo => infraRepo.AuctionIdExists(bidDtoPost.AuctionId)).ReturnsAsync(true);
-        _mockinfraRepo.Setup(infraRepo => infraRepo.UserIdExists(bidDtoPost.BuyerId)).ReturnsAsync(true);
-        _mockinfraRepo.Setup(infraRepo => infraRepo.UpdateMaxBid(bidDtoPost.AuctionId, bidDtoPost.Offer)).ReturnsAsync(HttpStatusCode.OK);
+        _mockinfraRepo.Setup(infraRepo => infraRepo.AuctionIdExists(bidDtoPost.AuctionId, _token)).ReturnsAsync(true);
+        _mockinfraRepo.Setup(infraRepo => infraRepo.UserIdExists(bidDtoPost.BuyerId, _token)).ReturnsAsync(true);
+        _mockinfraRepo.Setup(infraRepo => infraRepo.UpdateMaxBid(bidDtoPost.AuctionId, bidDtoPost.Offer, _token)).ReturnsAsync(HttpStatusCode.OK);
 
         // Handling
-        var postedBid = await _service.Post(bidDtoPost);
+        var postedBid = await _service.Post(bidDtoPost, _token);
 
         // Assertion
         Assert.AreEqual(bidToPost, postedBid);
@@ -143,63 +139,63 @@ public class BidServicePost
     public async Task BidPostUserDoesntExist()
     {
         BidDTO bidDtoPost = new BidDTO("1", "100", 60, DateTime.Now);
-        
+
         // Opretter et Bid-objekt, der repræsenterer det forventede oprettede bud
         Bid bidToPost = new Bid(bidDtoPost);
         bidToPost.Id = "1";
 
-        _mockinfraRepo.Setup(infraRepo => infraRepo.AuctionIdExists(bidDtoPost.AuctionId)).ReturnsAsync(true);
-        _mockinfraRepo.Setup(infraRepo => infraRepo.UserIdExists(bidDtoPost.BuyerId)).ReturnsAsync(false);
-        
+        _mockinfraRepo.Setup(infraRepo => infraRepo.AuctionIdExists(bidDtoPost.AuctionId, _token)).ReturnsAsync(true);
+        _mockinfraRepo.Setup(infraRepo => infraRepo.UserIdExists(bidDtoPost.BuyerId, _token)).ReturnsAsync(false);
+
         //act
 
         //assert
-     
-        var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost));
+
+        var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost, _token));
         Assert.AreEqual("The buyerId does not match a user in db", ex.Message);
-        
+
     }
-    
-    
+
+
     [Test]
     public async Task BidPostAuctionDoesntExist()
     {
         BidDTO bidDtoPost = new BidDTO("1", "100", 60, DateTime.Now);
-        
+
         // Opretter et Bid-objekt, der repræsenterer det forventede oprettede bud
         Bid bidToPost = new Bid(bidDtoPost);
         bidToPost.Id = "1";
 
-        _mockinfraRepo.Setup(infraRepo => infraRepo.AuctionIdExists(bidDtoPost.AuctionId)).ReturnsAsync(false);
-        
+        _mockinfraRepo.Setup(infraRepo => infraRepo.AuctionIdExists(bidDtoPost.AuctionId, _token)).ReturnsAsync(false);
+
         //act
-        
-        
-        var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost));
+
+
+        var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost, _token));
         Assert.AreEqual("The auctionId does not match an existing auction", ex.Message);
-        
-        
+
+
     }
 
     [Test]
     public async Task PostBidCreatedAtIsWrongTime()
     {
         BidDTO bidDtoPost = new BidDTO("1", "100", 60, DateTime.Now.AddMinutes(-10));
-        
+
         // Opretter et Bid-objekt, der repræsenterer det forventede oprettede bud
         Bid bidToPost = new Bid(bidDtoPost);
         bidToPost.Id = "1";
-        
-        
-        _mockinfraRepo.Setup(infraRepo => infraRepo.AuctionIdExists(bidDtoPost.AuctionId)).ReturnsAsync(true);
-        _mockinfraRepo.Setup(infraRepo => infraRepo.UserIdExists(bidDtoPost.BuyerId)).ReturnsAsync(true);
 
-        
+
+        _mockinfraRepo.Setup(infraRepo => infraRepo.AuctionIdExists(bidDtoPost.AuctionId, _token)).ReturnsAsync(true);
+        _mockinfraRepo.Setup(infraRepo => infraRepo.UserIdExists(bidDtoPost.BuyerId, _token)).ReturnsAsync(true);
+
+
         //act
-        var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost));
+        var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost, _token));
         Assert.AreEqual("Bid was posted with a wrong timestamp (not within 5 minutes of current time)", ex.Message);
 
-        
+
     }
 
 
@@ -211,27 +207,16 @@ public class BidServicePost
         // Opretter et Bid-objekt, der repræsenterer det forventede oprettede bud
         Bid bidToPost = new Bid(bidDtoPost);
         bidToPost.Id = "1";
-        
-       
 
-        
-        var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost));
+
+
+
+        var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost, _token));
         Assert.AreEqual("Offer is 0", ex.Message);
-        
-        
-        
+
+
+
     }
-    
-  
+
+
 }
-
-
-
-
-
-
-
-
-
-
-
