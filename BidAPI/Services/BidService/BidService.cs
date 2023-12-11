@@ -107,25 +107,24 @@ public class BidService : IBidService
                 _logger.LogInformation("Bid was attempted " + i);
                 Task.Delay(250).Wait();
 
-                try
+            try
+            {
+                _logger.LogInformation("Kommer ned i try i BidService.Post");
+                // Opdaterer det aktuelle maksimumsbud og tjekker om det nye bud blev accepteret
+                Bid? refreshedMaxBid = await _bidRepo.GetMaxBid(bidDTO.AuctionId);
+                if (refreshedMaxBid != null && refreshedMaxBid.BuyerId == bidDTO.BuyerId && refreshedMaxBid.Offer == bidDTO.Offer)
                 {
-                    _logger.LogInformation("Kommer ned i try i BidService.Post");
-                    // Opdaterer det aktuelle maksimumsbud og tjekker om det nye bud blev accepteret
-                    Bid refreshedMaxBid = await _bidRepo.GetMaxBid(bidDTO.AuctionId);
-                    if (refreshedMaxBid != null && refreshedMaxBid.BuyerId == bidDTO.BuyerId &&
-                        refreshedMaxBid.Offer == bidDTO.Offer)
-                    {
-                        // Opdaterer det maksimale bud i infrastrukturen og returnerer det accepterede bud
-                        await _infraRepo.UpdateMaxBid(bidDTO.AuctionId, refreshedMaxBid.Offer);
-                        return refreshedMaxBid;
-                    }
-                }
-                catch (ArgumentException e)
-                {
-                    _logger.LogError(e.Message);
-                    continue;
+                    // Opdaterer det maksimale bud i infrastrukturen og returnerer det accepterede bud
+                    await _infraRepo.UpdateMaxBid(bidDTO.AuctionId, refreshedMaxBid.Offer);
+                    return refreshedMaxBid;
                 }
             }
+            catch (ArgumentException e)
+            {
+                _logger.LogError(e.Message);
+                continue;
+            }
+        }
 
             // Kaster en undtagelse, hvis det nye bud ikke blev accepteret efter alle forsøg
             throw new Exception("Bid was not accepted");
@@ -138,11 +137,11 @@ public class BidService : IBidService
         }
     }
 
-    public Task<Bid> GetMaxBid(string auctionId)
+    public async Task<Bid?> GetMaxBid(string auctionId)
     {
         try
         {
-            return _bidRepo.GetMaxBid(auctionId);
+            return await _bidRepo.GetMaxBid(auctionId);
         }
         catch (Exception e)
         {
@@ -151,11 +150,23 @@ public class BidService : IBidService
         }
     }
 
-    public Task<List<Bid>> Get(string auctionId)
+    public async Task<List<Bid>> Get(string auctionId)
     {
         try
         {
-            return _bidRepo.Get(auctionId);
+            return await _bidRepo.Get(auctionId);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e.Message);
+            throw new Exception(e.Message);
+        }
+    }
+
+    public async Task<Bid?> DoesBidExists(string bidId){
+        try
+        {
+            return await _bidRepo.DoesBidExists(bidId);
         }
         catch (Exception e)
         {

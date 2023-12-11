@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using BidAPI.Services;
 using BidAPI.Models;
+using Microsoft.AspNetCore.Authorization;
+using System.Net;
 
 namespace BidAPI.Controllers;
 
@@ -32,6 +34,7 @@ public class BidsController : ControllerBase
 
     }
 
+    [Authorize]
     [HttpGet("{auctionId}")]
     public async Task<ActionResult<List<Bid>>> Get(string auctionId)
     {
@@ -47,6 +50,7 @@ public class BidsController : ControllerBase
         }
     }
 
+    [Authorize]
     [HttpGet("max/{auctionId}")]
     public async Task<ActionResult<Bid>> GetMaxBid(string auctionId)
     {
@@ -62,6 +66,7 @@ public class BidsController : ControllerBase
         }
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<ActionResult<Bid>> Post([FromBody] BidDTO bidDTO)
     {
@@ -74,6 +79,28 @@ public class BidsController : ControllerBase
         catch (Exception e)
         {
             _logger.LogError(e, "Error in CreateBid");
+            return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+        }
+    }
+
+
+    //Used to see if a bidId is valid
+    [Authorize]
+    [HttpGet("IsBidValid/{bidId}")]
+    public async Task<ActionResult<HttpStatusCode>> IsBidValid(string bidId)
+    {   
+        try
+        {
+            _logger.LogInformation($"IsBidValid - bidId: {bidId}");
+            var bid = await _service.DoesBidExists(bidId);
+            if(bid == null){
+                return NotFound();
+            }
+            return Ok(bid);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error in getting bids by auctionId");
             return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
         }
     }
