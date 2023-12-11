@@ -51,7 +51,7 @@ public class BidsController : ControllerBase
     }
 
     [Authorize]
-    [HttpGet("max")]
+    [HttpPost("max")]
     public async Task<ActionResult<Bid>> GetMaxBids(List<string> auctionIds)
     {
         try
