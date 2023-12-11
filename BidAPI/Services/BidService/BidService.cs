@@ -138,11 +138,11 @@ public class BidService : IBidService
         }
     }
 
-    public async Task<Bid?> GetMaxBid(string auctionId)
+    public async Task<List<Bid?>> GetMaxBids(List<string> auctionIds)
     {
         try
         {
-            return (await _bidRepo.GetMaxBids(new List<string> { auctionId })).FirstOrDefault();
+            return await _bidRepo.GetMaxBids(auctionIds);
         }
         catch (Exception e)
         {
