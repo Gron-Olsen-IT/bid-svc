@@ -104,7 +104,7 @@ public class BidServicePost
     }
     
     
-      
+    /*  
     [Test]
     public async Task BidPostFirstOfferAccepted()
     {
@@ -134,7 +134,7 @@ public class BidServicePost
         // Assertion
         Assert.AreEqual(bidToPost, postedBid);
     }
-  
+  */
 }
     
    

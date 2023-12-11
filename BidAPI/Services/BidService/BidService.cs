@@ -43,13 +43,13 @@ public class BidService : IBidService
             {
                 throw new ArgumentException("The buyerId does not match a user in db");
             }
-            
+            /*
             //skal der flere valideringer på f.eks også yesterday?
             if(bidDTO.CreatedAt < DateTime.Now) 
             {
                 throw new ArgumentException("Bid is created in the future");
             }
-            
+            */
             
             // Henter det aktuelle maksimumsbud for auktionen
             Bid? MaxBid = await _bidRepo.GetMaxBid(bidDTO.AuctionId);
