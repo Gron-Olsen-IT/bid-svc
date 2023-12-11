@@ -103,7 +103,7 @@ public class BidServicePost
         Assert.AreEqual("Bid is not greater than current max bid", ex.Message);
     }
     
-    /*
+    
       
     [Test]
     public async Task BidPostFirstOfferAccepted()
@@ -134,27 +134,10 @@ public class BidServicePost
         // Assertion
         Assert.AreEqual(bidToPost, postedBid);
     }
-    /*
-    [Test]
-    public async Task Post_ValidBidDTO_Success()
-    {
-        // Arrange
-        var bidDTO = new BidDTO(auctionId : "validAuctionId", buyerId : "validBuyerId", offer : 100, createdAt : DateTime.Now); 
-     
-
-        _mockinfraRepo.Setup(repo => repo.Get(It.IsAny<string>())).ReturnsAsync(true);
-        _mockinfraRepo.Setup(repo => repo.GetUserId(It.IsAny<string>())).ReturnsAsync(true);
-
-        // Act
-        var result = await _service.Post(bidDTO);
-
-        // Assert
-        Assert.NotNull(result);
-    }
-*/
+  
 }
     
-    
+   
     
 
     
