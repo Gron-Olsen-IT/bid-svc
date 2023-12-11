@@ -116,8 +116,8 @@ public class BidServicePost
         // Setting up the mock behavior for the repository's GetMaxBid method to return a value
 
         _mockmongoRepo.SetupSequence(bidRepo => bidRepo.GetMaxBids(new List<string> { "100" }))
-            .ReturnsAsync((List<Bid>?)null)
-            .ReturnsAsync(new List<Bid> { bidToPost });
+            .ReturnsAsync(new List<Bid?>())
+            .ReturnsAsync(new List<Bid?> { bidToPost });
 
 
 
