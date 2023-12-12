@@ -25,7 +25,7 @@ try
     builder.Services.AddScoped<IBidRepo, BidRepoMongo>();
     builder.Services.AddScoped<IRabbitController, RabbitController>();
     builder.Services.AddScoped<IInfraRepo, InfraRepo>();
-    
+
     builder.Logging.ClearProviders();
     builder.Host.UseNLog();
 
@@ -39,16 +39,16 @@ try
     builder.Services.AddControllers();
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen();
+    builder.Services.ConfigureSwagger("BidAPI");
 
     var app = builder.Build();
 
-    // Configure the HTTP request pipeline.
-    if (app.Environment.IsDevelopment())
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
     {
-        app.UseSwagger();
-        app.UseSwaggerUI();
-    }
+        c.SwaggerEndpoint("./v1/swagger.json", "Your Microservice API V1");
+    });
+
 
     app.UseHttpsRedirection();
 
