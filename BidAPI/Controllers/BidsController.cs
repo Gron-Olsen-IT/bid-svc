@@ -89,7 +89,7 @@ public class BidsController : ControllerBase
         {
             token = Request.Headers["Authorization"];
             _logger.LogInformation($"Controller.Post - BidDTO: {bidDTO}");
-            var bid = await _service.Post(bidDTO, token);
+            var bid = await _service.Post(bidDTO, token!);
             return Ok(bid);
         }
         catch (Exception e)

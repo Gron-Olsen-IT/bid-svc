@@ -62,7 +62,7 @@ public class BidServicePost
 
 
         // Asserting that the postedBid matches the expected bid to be posted
-        Assert.AreEqual(bidToPost, postedBid);
+        Assert.That(postedBid, Is.EqualTo(bidToPost));
     }
 
 
@@ -96,7 +96,7 @@ public class BidServicePost
 
 
         var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost, _token));
-        Assert.AreEqual("Bid is not greater than current max bid", ex.Message);
+        Assert.That(ex.Message, Is.EqualTo("Bid is not greater than current max bid"));
     }
 
     [Test]
@@ -131,7 +131,7 @@ public class BidServicePost
         var postedBid = await _service.Post(bidDtoPost, _token);
 
         // Assertion
-        Assert.AreEqual(bidToPost, postedBid);
+        Assert.That(postedBid, Is.EqualTo(bidToPost));
     }
 
     [Test]
@@ -152,7 +152,7 @@ public class BidServicePost
         //assert
 
         var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost, _token));
-        Assert.AreEqual("The buyerId does not match a user in db", ex.Message);
+        Assert.That(ex.Message, Is.EqualTo("The buyerId does not match a user in db"));
 
     }
 
@@ -172,7 +172,7 @@ public class BidServicePost
 
 
         var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost, _token));
-        Assert.AreEqual("The auctionId does not match an existing auction", ex.Message);
+        Assert.That(ex.Message, Is.EqualTo("The auctionId does not match an existing auction"));
 
 
     }
@@ -193,7 +193,7 @@ public class BidServicePost
 
         //act
         var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost, _token));
-        Assert.AreEqual("Bid was posted with a wrong timestamp (not within 5 minutes of current time)", ex.Message);
+        Assert.That(ex.Message, Is.EqualTo("Bid was posted with a wrong timestamp (not within 5 minutes of current time)"));
 
 
     }
@@ -212,7 +212,7 @@ public class BidServicePost
 
 
         var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost, _token));
-        Assert.AreEqual("Offer is 0", ex.Message);
+        Assert.That(ex.Message, Is.EqualTo("Offer is 0"));
 
 
 
