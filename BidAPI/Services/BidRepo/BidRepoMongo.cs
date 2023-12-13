@@ -41,7 +41,7 @@ public class BidRepoMongo : IBidRepo
             throw new Exception(e.Message);
         }
     }
-    public async Task<List<Bid?>> GetMaxBids(List<string> auctionIds)
+    public async Task<List<Bid>?> GetMaxBids(List<string> auctionIds)
     {
         try
         {
@@ -56,9 +56,9 @@ public class BidRepoMongo : IBidRepo
                                             .ReplaceRoot(bid => bid.HighestBid)
                                             .ToListAsync();
             if (aggregatedBids.Count == 0){
-                return new List<Bid?>{null};
+                return null;
             }
-            return aggregatedBids.Select(bid => (Bid?)bid).ToList();
+            return aggregatedBids.Select(bid => bid).ToList()!;
         }
         catch (Exception e)
         {

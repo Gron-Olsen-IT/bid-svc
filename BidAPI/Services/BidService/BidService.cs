@@ -137,7 +137,7 @@ public class BidService : IBidService
         }
     }
 
-    public async Task<List<Bid?>> GetMaxBids(List<string> auctionIds)
+    public async Task<List<Bid>?> GetMaxBids(List<string> auctionIds)
     {
         try
         {

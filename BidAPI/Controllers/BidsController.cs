@@ -51,6 +51,7 @@ public class BidsController : ControllerBase
         }
     }
 
+    //Gets a list of bids by auctionId
     [Authorize]
     [HttpPost("max")]
     public async Task<ActionResult<Bid>> GetMaxBids([FromBody]List<string> auctionIds)
@@ -67,6 +68,7 @@ public class BidsController : ControllerBase
         }
     }
 
+    
     [Authorize]
     [HttpPost]
     public async Task<ActionResult<Bid>> Post([FromBody] BidDTO bidDTO)
@@ -76,7 +78,7 @@ public class BidsController : ControllerBase
         {
             token = Request.Headers["Authorization"];
             _logger.LogInformation($"Controller.Post - BidDTO: {bidDTO}");
-            var bid = await _service.Post(bidDTO, token);
+            var bid = await _service.Post(bidDTO, token!);
             return Ok(bid);
         }
         catch (Exception e)
