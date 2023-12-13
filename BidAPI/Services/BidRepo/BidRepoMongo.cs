@@ -63,4 +63,25 @@ public class BidRepoMongo : IBidRepo
                 return null;
             }
             _logger.LogInformation("Returning max bids from auctionIds");
-            return aggreg
+            return aggregatedBids.Select(bid => bid).ToList()!;
+        }
+        catch (Exception e)
+        {
+            throw new Exception("Error in BidRepoMongo | GetMaxBids " + e.Message);
+        }
+    }
+
+    public async Task<List<Bid>> Get(string auctionId)
+    {
+        try
+        {
+            return await _collection.Find(bid => bid.AuctionId == auctionId).ToListAsync();
+        }
+        catch (Exception e)
+        {
+            throw new Exception(e.Message);
+        }
+    }
+
+
+}
