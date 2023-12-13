@@ -95,7 +95,7 @@ public class BidServicePost
 
 
 
-        var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost, _token));
+        var ex = Assert.ThrowsAsync<Exception>(() => _service.Post(bidDtoPost, _token));
         Assert.That(ex.Message, Is.EqualTo("Bid is not greater than current max bid"));
     }
 
@@ -106,18 +106,15 @@ public class BidServicePost
         BidDTO bidDtoPost = new BidDTO("1", "100", 60, DateTime.Now);
 
         // Opretter et Bid-objekt, der repræsenterer det forventede oprettede bud
-        Bid bidToPost = new Bid(bidDtoPost);
-        bidToPost.Id = "1";
-
-
-        _mockinfraRepo.SetupSequence(infraRepo => infraRepo.GetMinPrice("100", _token))
-            .ReturnsAsync(10);
+        Bid bidToPost = new Bid(bidDtoPost)
+        {
+            Id = "0"
+        };
 
         // Setting up the mock behavior for the repository's GetMaxBid method to return a value
-
-        _mockmongoRepo.SetupSequence(bidRepo => bidRepo.GetMaxBids(new List<string> { "100" }))
-            .ReturnsAsync(new List<Bid?>())
-            .ReturnsAsync(new List<Bid?> { bidToPost });
+        List<Bid>? maxBid = null;
+        List<string> auctionIds = new List<string> { "100" };
+        _mockmongoRepo.SetupSequence(bidRepo => bidRepo.GetMaxBids(auctionIds)).ReturnsAsync(maxBid);
 
 
 
@@ -126,6 +123,7 @@ public class BidServicePost
         _mockinfraRepo.Setup(infraRepo => infraRepo.AuctionIdExists(bidDtoPost.AuctionId, _token)).ReturnsAsync(true);
         _mockinfraRepo.Setup(infraRepo => infraRepo.UserIdExists(bidDtoPost.BuyerId, _token)).ReturnsAsync(true);
         _mockinfraRepo.Setup(infraRepo => infraRepo.UpdateMaxBid(bidDtoPost.AuctionId, bidDtoPost.Offer, _token)).ReturnsAsync(HttpStatusCode.OK);
+        _mockinfraRepo.Setup(infraRepo => infraRepo.GetMinPrice(bidDtoPost.AuctionId, _token)).ReturnsAsync(10);
 
         // Handling
         var postedBid = await _service.Post(bidDtoPost, _token);
@@ -151,7 +149,7 @@ public class BidServicePost
 
         //assert
 
-        var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost, _token));
+        var ex = Assert.ThrowsAsync<Exception>(() => _service.Post(bidDtoPost, _token));
         Assert.That(ex.Message, Is.EqualTo("The buyerId does not match a user in db"));
 
     }
@@ -171,7 +169,7 @@ public class BidServicePost
         //act
 
 
-        var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost, _token));
+        var ex = Assert.ThrowsAsync<Exception>(() => _service.Post(bidDtoPost, _token));
         Assert.That(ex.Message, Is.EqualTo("The auctionId does not match an existing auction"));
 
 
@@ -192,7 +190,7 @@ public class BidServicePost
 
 
         //act
-        var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost, _token));
+        var ex = Assert.ThrowsAsync<Exception>(() => _service.Post(bidDtoPost, _token));
         Assert.That(ex.Message, Is.EqualTo("Bid was posted with a wrong timestamp (not within 5 minutes of current time)"));
 
 
@@ -211,7 +209,7 @@ public class BidServicePost
 
 
 
-        var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost, _token));
+        var ex = Assert.ThrowsAsync<Exception>(() => _service.Post(bidDtoPost, _token));
         Assert.That(ex.Message, Is.EqualTo("Offer is 0"));
 
 
