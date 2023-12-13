@@ -7,8 +7,9 @@ using System.Security.Principal;
 
 namespace BidAPI.Controllers;
 
+[Authorize]
 [ApiController]
-[Route("[controller]")]
+[Route("bids")]
 public class BidsController : ControllerBase
 {
 
@@ -35,7 +36,11 @@ public class BidsController : ControllerBase
 
     }
 
-    [Authorize]
+    /// <summary>
+    /// Get all bids by auctionId
+    /// </summary>
+    /// <param name="auctionId"></param>
+    /// <returns></returns>
     [HttpGet("{auctionId}")]
     public async Task<ActionResult<List<Bid>>> Get(string auctionId)
     {
@@ -51,8 +56,11 @@ public class BidsController : ControllerBase
         }
     }
 
-    //Gets a list of bids by auctionId
-    [Authorize]
+    /// <summary>
+    /// Get max bids from a list of auctionIds
+    /// </summary>
+    /// <param name="auctionIds"></param>
+    /// <returns></returns>
     [HttpPost("max")]
     public async Task<ActionResult<Bid>> GetMaxBids([FromBody]List<string> auctionIds)
     {
@@ -68,8 +76,11 @@ public class BidsController : ControllerBase
         }
     }
 
-    
-    [Authorize]
+    /// <summary>
+    /// Create a bid
+    /// </summary>
+    /// <param name="bidDTO"></param>
+    /// <returns></returns>
     [HttpPost]
     public async Task<ActionResult<Bid>> Post([FromBody] BidDTO bidDTO)
     {
@@ -89,9 +100,12 @@ public class BidsController : ControllerBase
     }
 
 
-    //Used to see if a bidId is valid
-    [Authorize]
-    [HttpGet("IsBidValid/{bidId}")]
+    /// <summary>
+    /// Check if bid exists in the database
+    /// </summary>
+    /// <param name="bidId"></param>
+    /// <returns></returns>
+    [HttpGet("is-bid-valid/{bidId}")]
     public async Task<ActionResult<HttpStatusCode>> IsBidValid(string bidId)
     {   
         try
