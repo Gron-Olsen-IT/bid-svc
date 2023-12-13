@@ -94,7 +94,7 @@ public class BidsController : ControllerBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error in CreateBid");
+            _logger.LogError("Error in CreateBid", e.Message);
             return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
         }
     }

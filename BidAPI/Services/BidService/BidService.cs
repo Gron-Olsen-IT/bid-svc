@@ -4,7 +4,7 @@ namespace BidAPI.Services;
 
 public class BidService : IBidService
 {
-    private readonly IBidRepo _bidRepo;
+    private readonly IBidRepo   _bidRepo;
     private readonly ILogger<BidService> _logger;
     private readonly IInfraRepo _infraRepo;
     private readonly IRabbitController _rabbitController;
@@ -23,7 +23,7 @@ public class BidService : IBidService
     {
         try
         {
-            if(bidDTO.Offer == 0 )
+            if (bidDTO.Offer == 0)
             {
                 throw new ArgumentException("Offer is 0");
             }
@@ -32,33 +32,52 @@ public class BidService : IBidService
             {
                 throw new ArgumentException("AuctionId is empty or is null");
             }
-            
-            bool auctionExistsInDB = await _infraRepo.AuctionIdExists(bidDTO.AuctionId, token);
 
-            if (!auctionExistsInDB)
+            if (!await _infraRepo.AuctionIdExists(bidDTO.AuctionId, token))
             {
                 _logger.LogError("AuctionId does not exist in the DB");
                 throw new ArgumentException("The auctionId does not match an existing auction");
-                
+
             }
 
-            bool userIdExistsInDB = await _infraRepo.UserIdExists(bidDTO.BuyerId, token);
-            if (!userIdExistsInDB)
+            if (!await _infraRepo.UserIdExists(bidDTO.BuyerId, token))
             {
                 throw new ArgumentException("The buyerId does not match a user in db");
             }
-            
+
             //skal der flere valideringer på f.eks også yesterday?
-            if(bidDTO.CreatedAt < DateTime.Now.AddMinutes(-5) || bidDTO.CreatedAt > DateTime.Now.AddMinutes(5)) 
+            if (bidDTO.CreatedAt < DateTime.Now.AddMinutes(-5) || bidDTO.CreatedAt > DateTime.Now.AddMinutes(5))
             {
                 throw new ArgumentException("Bid was posted with a wrong timestamp (not within 5 minutes of current time)");
             }
-            
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Error in post bid (validate bid part)" + e.Message);
+            throw new Exception(e.Message);
+        }
+        Bid? MaxBid;
+        try
+        {
             // Henter det aktuelle maksimumsbud for auktionen
-            Bid? MaxBid = (await _bidRepo.GetMaxBids(new List<string> { bidDTO.AuctionId })).FirstOrDefault();
-            
-            //test
-        
+            var data = await _bidRepo.GetMaxBids(new List<string> { bidDTO.AuctionId });
+            if (data == null)
+            {
+                MaxBid = null;
+            }
+            else
+            {
+                MaxBid = data.First();
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("Error in post bid (get max bid part)" + e.Message);
+            throw new Exception(e.Message);
+        }
+        try{
+
+
             // Håndterer scenarier, hvor der ikke er noget eksisterende bud
             if (MaxBid == null)
             {
@@ -69,13 +88,11 @@ public class BidService : IBidService
                 // Validerer, om det nye bud er lavere end mindsteprisen
                 if (bidDTO.Offer < minPrice)
                 {
-                    throw new ArgumentException("Bid is lower than min price");
+                    throw new ArgumentException($"Bid is lower than min price of {minPrice}");
                 }
 
                 _logger.LogInformation("Calling _infraRepo.Post in BidService.Post1");
                 _infraRepo.Post(bidDTO);
-
-
             }
             else
             {
@@ -100,18 +117,22 @@ public class BidService : IBidService
                 _logger.LogInformation("Calling _infraRepo.Post in BidService.Post2");
                 _infraRepo.Post(bidDTO);
             }
+        }catch(Exception e){
+            _logger.LogError("Error in post bid (post bid part)" + e.Message);
+            throw new Exception(e.Message);
+        }
 
-            // Tjekker 20 gange om det nye bud blev accepteret, med 250 ms ventetid mellem hvert forsøg
-            for (int i = 0; i < 20; i++)
-            {
-                _logger.LogInformation("Bid was attempted " + i);
-                Task.Delay(250).Wait();
+        // Tjekker 20 gange om det nye bud blev accepteret, med 250 ms ventetid mellem hvert forsøg
+        for (int i = 0; i < 20; i++)
+        {
+            _logger.LogInformation("Bid was attempted " + i);
+            Task.Delay(250).Wait();
 
             try
             {
                 _logger.LogInformation("Kommer ned i try i BidService.Post");
                 // Opdaterer det aktuelle maksimumsbud og tjekker om det nye bud blev accepteret
-                Bid? refreshedMaxBid = (await _bidRepo.GetMaxBids(new List<string> { bidDTO.AuctionId })).FirstOrDefault();
+                Bid? refreshedMaxBid = (await _bidRepo.GetMaxBids(new List<string> { bidDTO.AuctionId }))!.First();
                 if (refreshedMaxBid != null && refreshedMaxBid.BuyerId == bidDTO.BuyerId && refreshedMaxBid.Offer == bidDTO.Offer)
                 {
                     // Opdaterer det maksimale bud i infrastrukturen og returnerer det accepterede bud
@@ -121,20 +142,12 @@ public class BidService : IBidService
             }
             catch (ArgumentException e)
             {
-                _logger.LogError(e.Message);
+                _logger.LogError("Couldn't find posted bid in database" + e.Message);
                 continue;
             }
         }
-
-            // Kaster en undtagelse, hvis det nye bud ikke blev accepteret efter alle forsøg
-            throw new Exception("Bid was not accepted");
-        }
-        catch (Exception e)
-        {
-            // Logger fejlmeddelelsen og kaster en ArgumentException videre
-            _logger.LogError(e.Message);
-            throw new ArgumentException(e.Message);
-        }
+        // Kaster en undtagelse, hvis det nye bud ikke blev accepteret efter alle forsøg
+        throw new Exception("Bid was not accepted");
     }
 
     public async Task<List<Bid>?> GetMaxBids(List<string> auctionIds)
@@ -145,7 +158,7 @@ public class BidService : IBidService
         }
         catch (Exception e)
         {
-            _logger.LogError(e.Message);
+            _logger.LogError("Error in BidService:GetMaxBids "+ e.Message);
             throw new Exception(e.Message);
         }
     }
@@ -163,7 +176,8 @@ public class BidService : IBidService
         }
     }
 
-    public async Task<Bid?> DoesBidExists(string bidId){
+    public async Task<Bid?> DoesBidExists(string bidId)
+    {
         try
         {
             return await _bidRepo.DoesBidExists(bidId);
@@ -194,5 +208,5 @@ public class BidService : IBidService
 
     }
 
-  
+
 }

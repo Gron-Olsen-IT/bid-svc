@@ -7,11 +7,12 @@ namespace BidAPI.Services;
 
 public class BidRepoMongo : IBidRepo
 {
-
+    private readonly ILogger<BidsController> _logger;
     private readonly IMongoCollection<Bid> _collection;
 
-    public BidRepoMongo()
+    public BidRepoMongo(ILogger<BidsController> logger)
     {
+        _logger = logger;
         string connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING") ?? "mongodb://admin:1234@localhost:27017/";
         var mongoDatabase = new MongoClient(connectionString).GetDatabase("bid_db");
         _collection = mongoDatabase.GetCollection<Bid>("bids");
@@ -45,6 +46,7 @@ public class BidRepoMongo : IBidRepo
     {
         try
         {
+            _logger.LogInformation("Getting max bids from auctionIds");
             List<Bid> aggregatedBids = await _collection.Aggregate()
                                             .Match(bid => auctionIds.Contains(bid.AuctionId))
                                             .SortByDescending(bid => bid.Offer)
@@ -55,28 +57,10 @@ public class BidRepoMongo : IBidRepo
                                             })
                                             .ReplaceRoot(bid => bid.HighestBid)
                                             .ToListAsync();
+            _logger.LogInformation("Got max bids from auctionIds " + aggregatedBids.ToString() + " " + aggregatedBids.Count);
             if (aggregatedBids.Count == 0){
+                _logger.LogInformation("No bids found - returning null");
                 return null;
             }
-            return aggregatedBids.Select(bid => bid).ToList()!;
-        }
-        catch (Exception e)
-        {
-            throw new Exception(e.Message);
-        }
-    }
-
-    public async Task<List<Bid>> Get(string auctionId)
-    {
-        try
-        {
-            return await _collection.Find(bid => bid.AuctionId == auctionId).ToListAsync();
-        }
-        catch (Exception e)
-        {
-            throw new Exception(e.Message);
-        }
-    }
-
-
-}
+            _logger.LogInformation("Returning max bids from auctionIds");
+            return aggreg
