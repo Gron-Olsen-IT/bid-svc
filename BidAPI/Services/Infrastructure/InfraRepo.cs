@@ -59,7 +59,6 @@ public class InfraRepo : IInfraRepo
             HttpClient httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Add("Authorization", token);
             var response = await httpClient.GetAsync($"{INFRA_CONN}/auctions/{auctionId}");
-            Console.WriteLine($"Response!!: {response}");
             return response.IsSuccessStatusCode;
         }
         catch (Exception e)
@@ -95,7 +94,6 @@ public class InfraRepo : IInfraRepo
             HttpClient httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Add("Authorization", token);
             var response = await httpClient.GetAsync($"{INFRA_CONN}/users/{userId}");
-            _logger.LogInformation($"get response" + response); 
             return response.IsSuccessStatusCode;
         }
         catch (Exception e)
