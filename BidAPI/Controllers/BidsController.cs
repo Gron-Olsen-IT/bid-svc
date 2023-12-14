@@ -56,8 +56,8 @@ public class BidsController : ControllerBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error in getting bids by auctionId");
-            return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            HandleException(e, "Getting bids");
+            throw;
         }
     }
 
@@ -69,7 +69,7 @@ public class BidsController : ControllerBase
     [HttpPost("max")]
     public async Task<ActionResult<Bid>> GetMaxBids([FromBody] List<string> auctionIds)
     {
-        auctionIds = ValidateIds(auctionIds).Value!;
+        ValidateIds(auctionIds);
         try
         {
             var bids = await _service.GetMaxBids(auctionIds);
@@ -81,8 +81,8 @@ public class BidsController : ControllerBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error in GetMaxBid");
-            return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            HandleException(e, "max");
+            throw;
         }
     }
 
@@ -104,19 +104,8 @@ public class BidsController : ControllerBase
         }
         catch (Exception e)
         {
-            _logger.LogError("Error in CreateBid", e.Message);
-            if (e is ArgumentNullException || e is ArgumentException)
-            {
-                return StatusCode(StatusCodes.Status400BadRequest, e.Message);
-            }
-            if (e is WebException)
-            {
-                return StatusCode(StatusCodes.Status404NotFound, e.Message);
-            }
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
-            }
-           
+            HandleException(e, "Post");
+            throw;
         }
     }
 
@@ -146,13 +135,13 @@ public class BidsController : ControllerBase
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Error in getting bids by auctionId");
-            return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            HandleException(e, "IsBidValid");
+            throw;
         }
     }
 
-
-    private ActionResult<List<string>> ValidateIds(List<string> Ids){
+    private ActionResult<List<string>> ValidateIds(List<string> Ids)
+    {
         if (Ids == null || Ids.Count == 0)
         {
             _logger.LogInformation($"AuctionIds is null or empty");
@@ -164,5 +153,21 @@ public class BidsController : ControllerBase
             return StatusCode(StatusCodes.Status400BadRequest, "Invalid auctionId");
         }
         return Ok(Ids);
+    }
+
+    private IActionResult HandleException(Exception e, string endpointMethod)
+    {
+        _logger.LogError($"Error in {endpointMethod}", e.Message);
+        if (e is ArgumentNullException || e is ArgumentException)
+        {
+            return StatusCode(StatusCodes.Status400BadRequest, e.Message);
+        }
+        if (e is WebException)
+        {
+            return StatusCode(StatusCodes.Status404NotFound, e.Message);
+        }
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+        }
     }
 }
