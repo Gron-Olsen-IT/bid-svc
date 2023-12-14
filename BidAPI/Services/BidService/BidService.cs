@@ -132,7 +132,14 @@ public class BidService : IBidService
             {
                 _logger.LogInformation("Kommer ned i try i BidService.Post");
                 // Opdaterer det aktuelle maksimumsbud og tjekker om det nye bud blev accepteret
-                Bid? refreshedMaxBid = (await _bidRepo.GetMaxBids(new List<string> { bidDTO.AuctionId }))!.First();
+                List<Bid>? data = new List<Bid>();
+                _logger.LogInformation("auction id: " + bidDTO.AuctionId);
+                data = await _bidRepo.GetMaxBids(new List<string> { bidDTO.AuctionId });
+                if (data == null)
+                {
+                    throw new ArgumentException("Bid was not accepted");
+                }
+                Bid? refreshedMaxBid = data.First();
                 if (refreshedMaxBid != null && refreshedMaxBid.BuyerId == bidDTO.BuyerId && refreshedMaxBid.Offer == bidDTO.Offer)
                 {
                     // Opdaterer det maksimale bud i infrastrukturen og returnerer det accepterede bud
