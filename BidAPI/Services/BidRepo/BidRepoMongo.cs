@@ -18,7 +18,7 @@ public class BidRepoMongo : IBidRepo
         _collection = mongoDatabase.GetCollection<Bid>("bids");
     }
 
-    public async Task<Bid?> DoesBidExists(string bidId)
+    public async Task<Bid?> DoesBidExist(string bidId)
     {
         try
         {

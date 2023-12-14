@@ -69,16 +69,7 @@ public class BidsController : ControllerBase
     [HttpPost("max")]
     public async Task<ActionResult<Bid>> GetMaxBids([FromBody] List<string> auctionIds)
     {
-        if (auctionIds == null || auctionIds.Count == 0)
-        {
-            _logger.LogInformation($"AuctionIds is null or empty");
-            return StatusCode(StatusCodes.Status400BadRequest, "AuctionIds is null or empty");
-        }
-        if (auctionIds.Any(a => string.IsNullOrEmpty(a) || a.Length != 24))
-        {
-            _logger.LogInformation($"Invalid auctionId: {auctionIds}");
-            return StatusCode(StatusCodes.Status400BadRequest, "Invalid auctionId");
-        }
+        auctionIds = ValidateIds(auctionIds).Value!;
         try
         {
             var bids = await _service.GetMaxBids(auctionIds);
@@ -138,10 +129,15 @@ public class BidsController : ControllerBase
     [HttpGet("is-bid-valid/{bidId}")]
     public async Task<ActionResult<HttpStatusCode>> IsBidValid(string bidId)
     {
+        if (string.IsNullOrEmpty(bidId) || bidId.Length != 24)
+        {
+            _logger.LogInformation($"Invalid auctionId: {bidId}");
+            return StatusCode(StatusCodes.Status400BadRequest, "Invalid bidId");
+        }
         try
         {
             _logger.LogInformation($"IsBidValid - bidId: {bidId}");
-            var bid = await _service.DoesBidExists(bidId);
+            var bid = await _service.DoesBidExist(bidId);
             if (bid == null)
             {
                 return NotFound();
@@ -153,5 +149,19 @@ public class BidsController : ControllerBase
             _logger.LogError(e, "Error in getting bids by auctionId");
             return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
         }
+    }
+
+    public ActionResult<List<string>> ValidateIds(List<string> Ids){
+        if (Ids == null || Ids.Count == 0)
+        {
+            _logger.LogInformation($"AuctionIds is null or empty");
+            return StatusCode(StatusCodes.Status400BadRequest, "AuctionIds is null or empty");
+        }
+        if (Ids.Any(a => string.IsNullOrEmpty(a) || a.Length != 24))
+        {
+            _logger.LogInformation($"Invalid auctionId: {Ids}");
+            return StatusCode(StatusCodes.Status400BadRequest, "Invalid auctionId");
+        }
+        return Ok(Ids);
     }
 }

@@ -178,14 +178,18 @@ public class BidService : IBidService
         }
     }
 
-    public async Task<Bid?> DoesBidExists(string bidId)
+public async Task<Bid?> DoesBidExist(string bidId)
     {
         try
         {
-            return await _bidRepo.DoesBidExists(bidId);
+            return await _bidRepo.DoesBidExist(bidId);
         }
         catch (Exception e)
         {
+            if(e.Message == "Sequence contains no elements")
+            {
+                throw new WebException("Bid does not exist");
+            }
             _logger.LogError(e.Message);
             throw new Exception(e.Message);
         }
