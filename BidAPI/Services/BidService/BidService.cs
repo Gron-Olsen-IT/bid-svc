@@ -160,7 +160,7 @@ public class BidService : IBidService
         }
         catch (Exception e)
         {
-            _logger.LogError("Error in BidService:GetMaxBids "+ e.Message);
+            _logger.LogError("Error in BidService: GetMaxBids " + e.Message);
             throw new Exception(e.Message);
         }
     }

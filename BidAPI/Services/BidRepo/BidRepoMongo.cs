@@ -1,3 +1,4 @@
+using System.Net;
 using BidAPI.Controllers;
 using BidAPI.Models;
 using MongoDB.Bson;
@@ -75,6 +76,11 @@ public class BidRepoMongo : IBidRepo
     {
         try
         {
+            List<Bid> bids = await _collection.Find(bid => bid.AuctionId == auctionId).ToListAsync();
+            if (bids.Count == 0)
+            {
+                throw new WebException("No bids found");
+            }
             return await _collection.Find(bid => bid.AuctionId == auctionId).ToListAsync();
         }
         catch (Exception e)
