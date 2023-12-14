@@ -4,6 +4,7 @@ using BidAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Net;
 using System.Security.Principal;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace BidAPI.Controllers;
 
@@ -40,7 +41,10 @@ public class BidsController : ControllerBase
     /// Get all bids on provided auctionId
     /// </summary>
     /// <param name="auctionId"></param>
-    /// <returns></returns>
+    [SwaggerResponse(200, "Returns a list of bids", typeof(List<Bid>))]
+    [SwaggerResponse(400, "Invalid paramater input")]
+    [SwaggerResponse(404, "Missing resource or data")]
+    [SwaggerResponse(500, "Internal Server Error")]
     [HttpGet("{auctionId}")]
     public async Task<ActionResult<List<Bid>>> Get(string auctionId)
     {
@@ -78,7 +82,10 @@ public class BidsController : ControllerBase
     /// Get max bids from a list of auctionIds
     /// </summary>
     /// <param name="auctionIds"></param>
-    /// <returns></returns>
+    [SwaggerResponse(200, "Returns a list containing the highest bid for each input auctionId", typeof(List<Bid>))]
+    [SwaggerResponse(400, "Invalid paramater input")]
+    [SwaggerResponse(404, "Missing resource or data")]
+    [SwaggerResponse(500, "Internal Server Error")]
     [HttpPost("max")]
     public async Task<ActionResult<Bid>> GetMaxBids([FromBody] List<string> auctionIds)
     {
@@ -125,7 +132,10 @@ public class BidsController : ControllerBase
     /// Create a bid
     /// </summary>
     /// <param name="bidDTO"></param>
-    /// <returns></returns>
+    [SwaggerResponse(200, "Create a bid", typeof(Bid))]
+    [SwaggerResponse(400, "Invalid paramater input")]
+    [SwaggerResponse(404, "Missing resource or data")]
+    [SwaggerResponse(500, "Internal Server Error")]
     [HttpPost]
     public async Task<ActionResult<Bid>> Post([FromBody] BidDTO bidDTO)
     {
@@ -162,7 +172,10 @@ public class BidsController : ControllerBase
     /// Check if bid exists in the database
     /// </summary>
     /// <param name="bidId"></param>
-    /// <returns></returns>
+    [SwaggerResponse(200, "Returns the validated bid", typeof(Bid))]
+    [SwaggerResponse(400, "Invalid paramater input")]
+    [SwaggerResponse(404, "Missing resource or data")]
+    [SwaggerResponse(500, "Internal Server Error")]
     [HttpGet("is-bid-valid/{bidId}")]
     public async Task<ActionResult<HttpStatusCode>> IsBidValid(string bidId)
     {
