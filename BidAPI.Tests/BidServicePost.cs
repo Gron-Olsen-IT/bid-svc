@@ -112,7 +112,11 @@ public class BidServicePost
         // Setting up the mock behavior for the repository's GetMaxBid method to return a value
         List<Bid>? maxBid = null;
         List<string> auctionIds = new List<string> { "100" };
-        _mockmongoRepo.SetupSequence(bidRepo => bidRepo.GetMaxBids(auctionIds)).ReturnsAsync(maxBid).ReturnsAsync(new List<Bid?> { bidToPost }!);
+        
+        // Using SetupSequence to return different values on consecutive calls
+        _mockmongoRepo.SetupSequence(bidRepo => bidRepo.GetMaxBids(auctionIds)).
+        ReturnsAsync(maxBid).
+        ReturnsAsync(new List<Bid?> { bidToPost }!);
 
 
 
