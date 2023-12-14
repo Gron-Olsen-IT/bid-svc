@@ -56,8 +56,21 @@ public class BidsController : ControllerBase
         }
         catch (Exception e)
         {
-            HandleException(e, "Getting bids");
-            throw;
+            _logger.LogError("Error in BidController: Get{id} ", e.Message);
+            if (e is ArgumentNullException || e is ArgumentException)
+            {
+                _logger.LogError("400: Bad Requestion in BidController: Get{id} ", e.Message);
+                return StatusCode(StatusCodes.Status400BadRequest, e.Message);
+            }
+            if (e is WebException)
+            {
+                _logger.LogError("404: Not Found in BidController: Get{id} ", e.Message);
+                return StatusCode(StatusCodes.Status404NotFound, e.Message);
+            }
+            {
+                _logger.LogError("500: Internal Server Error in BidController: Get{id} ", e.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
         }
     }
 
@@ -69,9 +82,10 @@ public class BidsController : ControllerBase
     [HttpPost("max")]
     public async Task<ActionResult<Bid>> GetMaxBids([FromBody] List<string> auctionIds)
     {
-        ValidateIds(auctionIds);
+
         try
         {
+            ValidateIds(auctionIds);
             var bids = await _service.GetMaxBids(auctionIds);
             if (bids == null || bids.Count == 0)
             {
@@ -81,8 +95,21 @@ public class BidsController : ControllerBase
         }
         catch (Exception e)
         {
-            HandleException(e, "max");
-            throw;
+            _logger.LogError("Error in BidController: Max", e.Message);
+            if (e is ArgumentNullException || e is ArgumentException)
+            {
+                _logger.LogError("400: Bad Requestion in BidController: Max ", e.Message);
+                return StatusCode(StatusCodes.Status400BadRequest, e.Message);
+            }
+            if (e is WebException)
+            {
+                _logger.LogError("404: Not Found in BidController: Max ", e.Message);
+                return StatusCode(StatusCodes.Status404NotFound, e.Message);
+            }
+            {
+                _logger.LogError("500: Internal Server Error in BidController: Max ", e.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
         }
     }
 
@@ -104,8 +131,21 @@ public class BidsController : ControllerBase
         }
         catch (Exception e)
         {
-            HandleException(e, "Post");
-            throw;
+            _logger.LogError("Error in BidController: Post", e.Message);
+            if (e is ArgumentNullException || e is ArgumentException)
+            {
+                _logger.LogError("400: Bad Requestion in BidController: Post ", e.Message);
+                return StatusCode(StatusCodes.Status400BadRequest, e.Message);
+            }
+            if (e is WebException)
+            {
+                _logger.LogError("404: Not Found in BidController: Post ", e.Message);
+                return StatusCode(StatusCodes.Status404NotFound, e.Message);
+            }
+            {
+                _logger.LogError("500: Internal Server Error in BidController: Post ", e.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
         }
     }
 
@@ -135,8 +175,21 @@ public class BidsController : ControllerBase
         }
         catch (Exception e)
         {
-            HandleException(e, "IsBidValid");
-            throw;
+            _logger.LogError("Error in BidController: IsBidValid", e.Message);
+            if (e is ArgumentNullException || e is ArgumentException)
+            {
+                _logger.LogError($"400: Bad Requestion in BidController: IsBidValid ", e.Message);
+                return StatusCode(StatusCodes.Status400BadRequest, e.Message);
+            }
+            if (e is WebException)
+            {
+                _logger.LogError($"404: Not Found in BidController: IsBidValid ", e.Message);
+                return StatusCode(StatusCodes.Status404NotFound, e.Message);
+            }
+            {
+                _logger.LogError($"500: Internal Server Error in BidController: IsBidValid ", e.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
         }
     }
 
@@ -153,21 +206,5 @@ public class BidsController : ControllerBase
             return StatusCode(StatusCodes.Status400BadRequest, "Invalid auctionId");
         }
         return Ok(Ids);
-    }
-
-    private IActionResult HandleException(Exception e, string endpointMethod)
-    {
-        _logger.LogError($"Error in {endpointMethod}", e.Message);
-        if (e is ArgumentNullException || e is ArgumentException)
-        {
-            return StatusCode(StatusCodes.Status400BadRequest, e.Message);
-        }
-        if (e is WebException)
-        {
-            return StatusCode(StatusCodes.Status404NotFound, e.Message);
-        }
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
-        }
     }
 }
