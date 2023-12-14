@@ -37,13 +37,18 @@ public class BidsController : ControllerBase
     }
 
     /// <summary>
-    /// Get all bids by auctionId
+    /// Get all bids on provided auctionId
     /// </summary>
     /// <param name="auctionId"></param>
     /// <returns></returns>
     [HttpGet("{auctionId}")]
     public async Task<ActionResult<List<Bid>>> Get(string auctionId)
     {
+        if (string.IsNullOrEmpty(auctionId) || auctionId.Length != 24)
+        {
+            _logger.LogInformation($"Invalid auctionId: {auctionId}");
+            return StatusCode(StatusCodes.Status400BadRequest, "Invalid auctionId");
+        }
         try
         {
             var bids = await _service.Get(auctionId);
@@ -62,11 +67,25 @@ public class BidsController : ControllerBase
     /// <param name="auctionIds"></param>
     /// <returns></returns>
     [HttpPost("max")]
-    public async Task<ActionResult<Bid>> GetMaxBids([FromBody]List<string> auctionIds)
+    public async Task<ActionResult<Bid>> GetMaxBids([FromBody] List<string> auctionIds)
     {
+        if (auctionIds == null || auctionIds.Count == 0)
+        {
+            _logger.LogInformation($"AuctionIds is null or empty");
+            return StatusCode(StatusCodes.Status400BadRequest, "AuctionIds is null or empty");
+        }
+        if (auctionIds.Any(a => string.IsNullOrEmpty(a) || a.Length != 24))
+        {
+            _logger.LogInformation($"Invalid auctionId: {auctionIds}");
+            return StatusCode(StatusCodes.Status400BadRequest, "Invalid auctionId");
+        }
         try
         {
             var bids = await _service.GetMaxBids(auctionIds);
+            if (bids == null || bids.Count == 0)
+            {
+                return NotFound();
+            }
             return Ok(bids);
         }
         catch (Exception e)
@@ -95,7 +114,18 @@ public class BidsController : ControllerBase
         catch (Exception e)
         {
             _logger.LogError("Error in CreateBid", e.Message);
-            return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            if (e is ArgumentNullException || e is ArgumentException)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, e.Message);
+            }
+            if (e is WebException)
+            {
+                return StatusCode(StatusCodes.Status404NotFound, e.Message);
+            }
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
+           
         }
     }
 
@@ -107,12 +137,13 @@ public class BidsController : ControllerBase
     /// <returns></returns>
     [HttpGet("is-bid-valid/{bidId}")]
     public async Task<ActionResult<HttpStatusCode>> IsBidValid(string bidId)
-    {   
+    {
         try
         {
             _logger.LogInformation($"IsBidValid - bidId: {bidId}");
             var bid = await _service.DoesBidExists(bidId);
-            if(bid == null){
+            if (bid == null)
+            {
                 return NotFound();
             }
             return Ok(bid);
