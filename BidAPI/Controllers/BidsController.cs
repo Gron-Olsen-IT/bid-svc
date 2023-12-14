@@ -151,7 +151,8 @@ public class BidsController : ControllerBase
         }
     }
 
-    public ActionResult<List<string>> ValidateIds(List<string> Ids){
+
+    private ActionResult<List<string>> ValidateIds(List<string> Ids){
         if (Ids == null || Ids.Count == 0)
         {
             _logger.LogInformation($"AuctionIds is null or empty");
