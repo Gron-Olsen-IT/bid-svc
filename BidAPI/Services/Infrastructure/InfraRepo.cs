@@ -7,14 +7,24 @@ namespace BidAPI.Services;
 
 public class InfraRepo : IInfraRepo
 {
-    private readonly string INFRA_CONN = Environment.GetEnvironmentVariable("INFRA_CONN") ?? "http://localhost:5000/api/infra/";
+    private readonly string INFRA_CONN;// = Environment.GetEnvironmentVariable("INFRA_CONN");// ?? "http://localhost:5000/api/infra/";
 
     private readonly ILogger<InfraRepo> _logger;
     private readonly IRabbitController _rabbitController;
 
-    public InfraRepo(ILogger<InfraRepo> logger, IRabbitController rabbitController)
+    public InfraRepo(ILogger<InfraRepo> logger, IRabbitController rabbitController, IConfiguration configuration)
     {
         _logger = logger;
+        try
+        {
+            INFRA_CONN = configuration["INFRA_CONN"]!;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("INFRA_CONN is not set " + e.Message);
+            throw new Exception(e.Message);
+        }
+        
         _rabbitController = rabbitController;
     }
     public async Task<HttpStatusCode> UpdateMaxBid(string auctionId, int maxBid, string token)
