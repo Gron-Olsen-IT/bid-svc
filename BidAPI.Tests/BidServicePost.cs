@@ -93,7 +93,7 @@ public class BidServicePost
 
 
 
-        var ex = Assert.ThrowsAsync<Exception>(() => _service.Post(bidDtoPost, _token));
+        var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost, _token));
         Assert.That(ex.Message, Is.EqualTo("Bid is not greater than current max bid"));
     }
 
@@ -151,7 +151,7 @@ public class BidServicePost
 
         //assert
 
-        var ex = Assert.ThrowsAsync<Exception>(() => _service.Post(bidDtoPost, _token));
+        var ex = Assert.ThrowsAsync<WebException>(() => _service.Post(bidDtoPost, _token));
         Assert.That(ex.Message, Is.EqualTo("The buyerId does not match a user in db"));
 
     }
@@ -171,7 +171,7 @@ public class BidServicePost
         //act
 
 
-        var ex = Assert.ThrowsAsync<Exception>(() => _service.Post(bidDtoPost, _token));
+        var ex = Assert.ThrowsAsync<WebException>(() => _service.Post(bidDtoPost, _token));
         Assert.That(ex.Message, Is.EqualTo("The auctionId does not match an existing auction"));
 
 
@@ -192,7 +192,7 @@ public class BidServicePost
 
 
         //act
-        var ex = Assert.ThrowsAsync<Exception>(() => _service.Post(bidDtoPost, _token));
+        var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost, _token));
         Assert.That(ex.Message, Is.EqualTo("Bid was posted with a wrong timestamp (not within 5 minutes of current time)"));
 
 
@@ -211,7 +211,7 @@ public class BidServicePost
 
 
 
-        var ex = Assert.ThrowsAsync<Exception>(() => _service.Post(bidDtoPost, _token));
+        var ex = Assert.ThrowsAsync<ArgumentException>(() => _service.Post(bidDtoPost, _token));
         Assert.That(ex.Message, Is.EqualTo("Offer is 0"));
 
 

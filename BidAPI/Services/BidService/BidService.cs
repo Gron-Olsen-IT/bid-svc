@@ -1,3 +1,4 @@
+using System.Net;
 using BidAPI.Models;
 
 namespace BidAPI.Services;
@@ -27,24 +28,18 @@ public class BidService : IBidService
             {
                 throw new ArgumentException("Offer is 0");
             }
-
             if (string.IsNullOrEmpty(bidDTO.AuctionId))
             {
                 throw new ArgumentException("AuctionId is empty or is null");
             }
-
             if (!await _infraRepo.AuctionIdExists(bidDTO.AuctionId, token))
             {
-                _logger.LogError("AuctionId does not exist in the DB");
-                throw new ArgumentException("The auctionId does not match an existing auction");
-
+                throw new WebException("The auctionId does not match an existing auction");
             }
-
             if (!await _infraRepo.UserIdExists(bidDTO.BuyerId, token))
             {
-                throw new ArgumentException("The buyerId does not match a user in db");
+                throw new WebException("The buyerId does not match a user in db");
             }
-
             //skal der flere valideringer på f.eks også yesterday?
             if (bidDTO.CreatedAt < DateTime.Now.AddMinutes(-5) || bidDTO.CreatedAt > DateTime.Now.AddMinutes(5))
             {
@@ -54,7 +49,7 @@ public class BidService : IBidService
         catch (Exception e)
         {
             _logger.LogError("Error in post bid (validate bid part)" + e.Message);
-            throw new Exception(e.Message);
+            throw;
         }
         Bid? MaxBid;
         try
@@ -73,7 +68,7 @@ public class BidService : IBidService
         catch (Exception e)
         {
             _logger.LogError("Error in post bid (get max bid part)" + e.Message);
-            throw new Exception(e.Message);
+            throw new WebException(e.Message);
         }
         try{
 
@@ -88,7 +83,7 @@ public class BidService : IBidService
                 // Validerer, om det nye bud er lavere end mindsteprisen
                 if (bidDTO.Offer < minPrice)
                 {
-                    throw new ArgumentException($"Bid is lower than min price of {minPrice}");
+                    throw new ArgumentException($"Bid is lower than min price of {minPrice}", "bidDTO.Offer < minPrice");
                 }
 
                 _logger.LogInformation("Calling _infraRepo.Post in BidService.Post1");
@@ -119,7 +114,7 @@ public class BidService : IBidService
             }
         }catch(Exception e){
             _logger.LogError("Error in post bid (post bid part)" + e.Message);
-            throw new Exception(e.Message);
+            throw;
         }
 
         // Tjekker 20 gange om det nye bud blev accepteret, med 250 ms ventetid mellem hvert forsøg
@@ -137,7 +132,7 @@ public class BidService : IBidService
                 data = await _bidRepo.GetMaxBids(new List<string> { bidDTO.AuctionId });
                 if (data == null)
                 {
-                    throw new ArgumentException("Bid was not accepted");
+                    throw new WebException("Bid was not accepted");
                 }
                 Bid? refreshedMaxBid = data.First();
                 if (refreshedMaxBid != null && refreshedMaxBid.BuyerId == bidDTO.BuyerId && refreshedMaxBid.Offer == bidDTO.Offer)
@@ -147,7 +142,7 @@ public class BidService : IBidService
                     return refreshedMaxBid;
                 }
             }
-            catch (ArgumentException e)
+            catch (Exception e)
             {
                 _logger.LogError("Couldn't find posted bid in database" + e.Message);
                 continue;
@@ -165,7 +160,7 @@ public class BidService : IBidService
         }
         catch (Exception e)
         {
-            _logger.LogError("Error in BidService:GetMaxBids "+ e.Message);
+            _logger.LogError("Error in BidService: GetMaxBids " + e.Message);
             throw new Exception(e.Message);
         }
     }
@@ -183,14 +178,18 @@ public class BidService : IBidService
         }
     }
 
-    public async Task<Bid?> DoesBidExists(string bidId)
+public async Task<Bid?> DoesBidExist(string bidId)
     {
         try
         {
-            return await _bidRepo.DoesBidExists(bidId);
+            return await _bidRepo.DoesBidExist(bidId);
         }
         catch (Exception e)
         {
+            if(e.Message == "Sequence contains no elements")
+            {
+                throw new WebException("Bid does not exist");
+            }
             _logger.LogError(e.Message);
             throw new Exception(e.Message);
         }
