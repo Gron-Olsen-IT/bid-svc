@@ -20,7 +20,7 @@ try
 
     var builder = WebApplication.CreateBuilder(args);
 
-    builder.Services.AddSingleton<IVaultClient>(sidecar.vaultClient);
+    //builder.Services.AddSingleton<IVaultClient>(sidecar.vaultClient);
     builder.Services.AddScoped<IBidService, BidService>();
     builder.Services.AddScoped<IBidRepo, BidRepoMongo>();
     builder.Services.AddScoped<IRabbitController, RabbitController>();
