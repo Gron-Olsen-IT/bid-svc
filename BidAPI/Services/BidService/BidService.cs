@@ -40,7 +40,6 @@ public class BidService : IBidService
             {
                 throw new WebException("The buyerId does not match a user in db");
             }
-            //skal der flere valideringer på f.eks også yesterday?
             if (bidDTO.CreatedAt < DateTime.Now.AddMinutes(-5) || bidDTO.CreatedAt > DateTime.Now.AddMinutes(5))
             {
                 throw new ArgumentException("Bid was posted with a wrong timestamp (not within 5 minutes of current time)");
@@ -54,7 +53,7 @@ public class BidService : IBidService
         Bid? MaxBid;
         try
         {
-            // Henter det aktuelle maksimumsbud for auktionen
+            // Gets the current max bid based on a list of auctionIds
             var data = await _bidRepo.GetMaxBids(new List<string> { bidDTO.AuctionId });
             if (data == null)
             {
@@ -73,14 +72,14 @@ public class BidService : IBidService
         try{
 
 
-            // Håndterer scenarier, hvor der ikke er noget eksisterende bud
+            // Handles scenarios where there is no current max bid
             if (MaxBid == null)
             {
                 Console.WriteLine("MaxBid er null");
-                // Henter den aktuelle mindstepris for auktionen
+                // Gets the minimum price for the auction
                 int minPrice = await _infraRepo.GetMinPrice(bidDTO.AuctionId, token);
 
-                // Validerer, om det nye bud er lavere end mindsteprisen
+                // Validates that the new bid is greater than or equal to the minimum price
                 if (bidDTO.Offer < minPrice)
                 {
                     throw new ArgumentException($"Bid is lower than min price of {minPrice}", "bidDTO.Offer < minPrice");
@@ -91,19 +90,17 @@ public class BidService : IBidService
             }
             else
             {
-                // Finder det aktuelle maksimumsbud
                 int currentMaxBid = MaxBid.Offer;
 
-                // Validerer, om det nye bud er større eller lig med det aktuelle maksimumsbud
                 if (bidDTO.Offer <= currentMaxBid)
                 {
                     throw new ArgumentException("Bid is not greater than current max bid");
                 }
 
-                // Beregner minimumsforøgelsen baseret på det aktuelle maksimumsbud
+                // Calculates the minimum increment for the new bid
                 int minIncrement = CalculateMinIncrement(currentMaxBid);
 
-                // Validerer, om forøgelsen af det nye bud er tilstrækkelig i forhold til minimumsforøgelsen
+                // Validates that the new bid is greater than the current max bid plus the minimum increment
                 if (bidDTO.Offer - currentMaxBid < minIncrement)
                 {
                     throw new ArgumentException("Bid post increment is too small");
@@ -117,7 +114,7 @@ public class BidService : IBidService
             throw;
         }
 
-        // Tjekker 20 gange om det nye bud blev accepteret, med 250 ms ventetid mellem hvert forsøg
+        // Checks if the new bid was accepted, and if not, tries again 20 times with a 250 ms delay
         for (int i = 0; i < 20; i++)
         {
             _logger.LogInformation("Bid was attempted " + i);
@@ -125,8 +122,7 @@ public class BidService : IBidService
 
             try
             {
-                _logger.LogInformation("Kommer ned i try i BidService.Post");
-                // Opdaterer det aktuelle maksimumsbud og tjekker om det nye bud blev accepteret
+                // Validates that the new bid was accepted. If not, the loop continues
                 List<Bid>? data = new List<Bid>();
                 _logger.LogInformation("auction id: " + bidDTO.AuctionId);
                 data = await _bidRepo.GetMaxBids(new List<string> { bidDTO.AuctionId });
@@ -137,7 +133,7 @@ public class BidService : IBidService
                 Bid? refreshedMaxBid = data.First();
                 if (refreshedMaxBid != null && refreshedMaxBid.BuyerId == bidDTO.BuyerId && refreshedMaxBid.Offer == bidDTO.Offer)
                 {
-                    // Opdaterer det maksimale bud i infrastrukturen og returnerer det accepterede bud
+                    // If the new bid was accepted, the max bid is updated in the database and returned
                     await _infraRepo.UpdateMaxBid(bidDTO.AuctionId, refreshedMaxBid.Offer, token);
                     return refreshedMaxBid;
                 }
@@ -148,7 +144,7 @@ public class BidService : IBidService
                 continue;
             }
         }
-        // Kaster en undtagelse, hvis det nye bud ikke blev accepteret efter alle forsøg
+        // Throws an exception if the new bid was not accepted after 20 tries
         throw new Exception("Bid was not accepted");
     }
 
